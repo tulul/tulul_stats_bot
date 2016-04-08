@@ -21,7 +21,7 @@ module TululStats
       self.users.sort_by{ |b| eval("b.#{field}") }.reverse.map do |user|
         sum = eval("user.#{field}")
         "#{count += 1}. #{user.full_name}: #{sum}" if sum > 0
-      end.join("\n")
+      end.compact.join("\n")
     end
   end
 end
