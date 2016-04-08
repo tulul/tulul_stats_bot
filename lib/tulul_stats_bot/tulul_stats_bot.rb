@@ -43,6 +43,7 @@ class TululStatsBot
         user.inc_location if message.location
 
         query = /\/top_(.+)/.match(message.text).captures[0] rescue nil
+        query = query.split('@')[0] rescue nil
         if query && TululStats::User.fields.except(TululStats::User::EXCEPTION).keys.include?(query)
           res = group.top(query)
           res = 'Belum cukup data' if res.gsub("\n", '').empty?

@@ -17,7 +17,6 @@ module TululStats
     end
 
     def top(field)
-      field = field.split('@')[0]
       count = 0
       self.users.sort_by{ |b| eval("b.#{field}") }.reverse.map do |user|
         sum = eval("user.#{field}")
