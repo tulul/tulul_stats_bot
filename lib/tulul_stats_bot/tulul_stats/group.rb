@@ -28,7 +28,7 @@ module TululStats
       prev_sum = -1
       prev_count = 1
 
-      res.each do |entry|
+      res.map do |entry|
         name = entry[0]
         sum = entry[1]
 
