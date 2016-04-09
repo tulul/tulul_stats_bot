@@ -19,7 +19,7 @@ module TululStats
     def top(field)
       res = self.users.sort_by{ |b| eval("b.#{field}") }.reverse.map do |user|
         sum = eval("user.#{field}")
-        [name, sum] if sum > 0
+        [user.full_name, sum] if sum > 0
       end.compact
 
       total = res.inject(0){ |b, c| b + c[1] }.to_f
