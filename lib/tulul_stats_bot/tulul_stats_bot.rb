@@ -56,5 +56,9 @@ class TululStatsBot
         end
       end
     end
+  rescue Exception => e
+    puts e.message
+    puts e.backtrace.select{ |err| err =~ /tulul/ }.join(',')
+    retry
   end
 end
