@@ -11,14 +11,14 @@ class TululStatsBot
 
           user.inc_message
 
-          if message.text =~ /#qt/i
-            user.inc_qting
-            group.get_user(message.reply_to_message.from).inc_qted if message.reply_to_message
-          end
-
           if message.reply_to_message
             user.inc_replying
             group.get_user(message.reply_to_message.from).inc_replied
+
+            if message.text =~ /#qt/i
+              user.inc_qting
+              group.get_user(message.reply_to_message.from).inc_qted
+            end
           end
 
           if message.forward_from
