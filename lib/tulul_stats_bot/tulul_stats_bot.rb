@@ -48,15 +48,15 @@ class TululStatsBot
           if query && TululStats::User.fields.except(TululStats::User::EXCEPTION).keys.include?(query)
             res = group.top(query)
             res = 'Belum cukup data' if res.gsub("\n", '').empty?
-            @@bot.api.send_message(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id) rescue nil
+            @@bot.api.send_message(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id) rescue retry
           end
-        rescue Exception => e
+        rescue StandardError => e
           puts e.message
           puts e.backtrace.select{ |err| err =~ /tulul/ }.join(',')
         end
       end
     end
-  rescue Exception => e
+  rescue StandardError => e
     puts e.message
     puts e.backtrace.select{ |err| err =~ /tulul/ }.join(',')
     retry
