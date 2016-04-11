@@ -10,6 +10,7 @@ module TululStats
     field :message,           type: Integer, default: 0
     field :qting,             type: Integer, default: 0
     field :qted,              type: Integer, default: 0
+    field :leliing,           type: Integer, default: 0
     field :replying,          type: Integer, default: 0
     field :replied,           type: Integer, default: 0
     field :forwarding,        type: Integer, default: 0

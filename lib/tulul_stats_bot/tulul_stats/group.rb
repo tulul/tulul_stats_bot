@@ -17,8 +17,8 @@ module TululStats
     end
 
     def top(field)
-      res = self.users.sort_by{ |b| eval("b.#{field}") }.reverse.map do |user|
-        sum = eval("user.#{field}")
+      res = self.users.sort_by{ |b| b.send("#{field}") }.reverse.map do |user|
+        sum = user.send("#{field}")
         [user.full_name, sum] if sum > 0
       end.compact
 
@@ -42,7 +42,7 @@ module TululStats
 
         percentage = "%.2f" % (sum * 100 / total) rescue 0
 
-        "#{rank}. #{name}: #{sum} (#{percentage}%)"
+        "#{rank}. #{name}: <b>#{sum}</b> (#{percentage}%)"
       end.join("\n")
     end
   end
