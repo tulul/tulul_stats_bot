@@ -33,8 +33,20 @@ class TululStatsBot
               group.get_user(message.forward_from).inc_forwarded
             end
 
-            if message.text =~ /\/leli/
+            if message.text =~ /^\/leli/
               user.inc_leliing
+            end
+
+            if message.text =~ /^\/get/
+              user.inc_getting
+            end
+
+            if message.text =~ /<.*blog.*>/
+              user.inc_blogging
+            end
+
+            if message.text =~ / lu.?$/
+              user.inc_luing
             end
 
             user.inc_ch_title if message.new_chat_title
