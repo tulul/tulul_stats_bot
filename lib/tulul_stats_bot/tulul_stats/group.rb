@@ -28,7 +28,7 @@ module TululStats
       prev_sum = -1
       prev_count = 1
 
-      res.map do |entry|
+      res.map! do |entry|
         name = entry[0]
         sum = entry[1]
 
@@ -43,7 +43,12 @@ module TululStats
         percentage = "%.2f" % (sum * 100 / total) rescue 0
 
         "#{rank}. #{name}: <b>#{sum}</b> (#{percentage}%)"
-      end.join("\n")
+      end
+
+      field = field.gsub('ch', 'change').gsub('del', 'delete').humanize(capitalize: false).pluralize
+      res = res.compact.join("\n")
+      res = "Total #{field}: <b>#{total.to_i}</b>\n" + res unless res.empty?
+      res
     end
   end
 end

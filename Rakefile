@@ -3,6 +3,7 @@ require 'redis'
 require 'mongoid'
 require 'telegram/bot'
 require 'sucker_punch'
+require 'active_support/inflector'
 
 require File.dirname(__FILE__) + '/config/init.rb'
 Dir[File.dirname(__FILE__) + '/lib/tulul_stats_bot/*/*.rb'].each{ |file| require file }

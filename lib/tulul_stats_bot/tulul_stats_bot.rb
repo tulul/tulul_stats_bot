@@ -11,7 +11,7 @@ class TululStatsBot
 
           query = /\/top_(.+)/.match(message.text).captures[0] rescue nil
           query = query.split('@')[0] rescue nil
-          if query && TululStats::User.fields.except(TululStats::User::EXCEPTION).keys.include?(query)
+          if query && TululStats::User.fields.reject{ |field| TululStats::User::EXCEPTION.include?(field) }.keys.include?(query)
             res = group.top(query)
             res = 'Belum cukup data' if res.gsub("\n", '').empty?
             @@bot.api.send_message(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML') rescue retry
