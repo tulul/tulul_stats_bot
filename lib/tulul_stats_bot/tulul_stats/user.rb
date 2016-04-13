@@ -14,6 +14,9 @@ module TululStats
     field :getting,           type: Integer, default: 0
     field :blogging,          type: Integer, default: 0
     field :luing,             type: Integer, default: 0
+    field :mentioning,        type: Integer, default: 0
+    field :hashtagging,       type: Integer, default: 0
+    field :linking,           type: Integer, default: 0
     field :replying,          type: Integer, default: 0
     field :replied,           type: Integer, default: 0
     field :forwarding,        type: Integer, default: 0
@@ -35,6 +38,7 @@ module TululStats
     field :location,          type: Integer, default: 0
 
     index({ user_id: 1, group_id: 1 }, { unique: true })
+    index({ username: 1, group_id: 1 })
 
     belongs_to :group, class_name: 'TululStats::Group', index: true
 

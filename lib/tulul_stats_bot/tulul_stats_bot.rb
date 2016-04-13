@@ -11,7 +11,7 @@ class TululStatsBot
 
           query = /\/top_(.+)/.match(message.text).captures[0] rescue nil
           query = query.split('@')[0] rescue nil
-          if query && TululStats::User.fields.reject{ |field| TululStats::User::EXCEPTION.include?(field) }.keys.include?(query)
+          if query && (TululStats::User.fields.keys.reject{ |field| TululStats::User::EXCEPTION.include?(field) } + TululStats::Entity::ENTITY_QUERY).include?(query)
             res = group.top(query)
             res = 'Belum cukup data' if res.gsub("\n", '').empty?
             @@bot.api.send_message(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML') rescue retry
@@ -53,8 +53,8 @@ class TululStatsBot
             user.inc_ch_photo unless message.new_chat_photo.empty?
             user.inc_del_photo if message.delete_chat_photo
 
-            group.get_user(message.left_chat_participant).inc_left_group if message.left_chat_participant
-            group.get_user(message.new_chat_participant).inc_join_group if message.new_chat_participant
+            group.get_user(message.left_chat_member).inc_left_group if message.left_chat_member
+            group.get_user(message.new_chat_member).inc_join_group if message.new_chat_member
 
             user.inc_text if message.text
             user.inc_audio if message.audio
@@ -65,6 +65,13 @@ class TululStatsBot
             user.inc_voice if message.voice
             user.inc_contact if message.contact
             user.inc_location if message.location
+
+            message.entities.each do |entity|
+              user.inc_mentioning if entity.type == 'mention'
+              user.inc_hashtagging if entity.type == 'hashtag'
+              user.inc_linking if entity.type == 'url'
+              group.add_entity(message.text, entity) if TululStats::Entity::ENTITY_QUERY.include?(entity.type)
+            end
           end
         rescue StandardError => e
           puts e.message

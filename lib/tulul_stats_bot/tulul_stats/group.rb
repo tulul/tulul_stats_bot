@@ -7,6 +7,7 @@ module TululStats
     index({ group_id: 1 }, { unique: true })
 
     has_many :users, class_name: 'TululStats::User'
+    has_many :entities, class_name: 'TululStats::Entity'
 
     def self.get_group(message)
       self.find_or_create_by(group_id: message.chat.id)
@@ -16,11 +17,20 @@ module TululStats
       self.users.get(user, self.id)
     end
 
+    def add_entity(message, entity)
+      self.entities.add_new(message[entity.offset...entity.offset + entity.length], entity.type, self.id)
+    end
+
     def top(field)
-      res = self.users.sort_by{ |b| b.send("#{field}") }.reverse.map do |user|
-        sum = user.send("#{field}")
-        [user.full_name, sum] if sum > 0
-      end.compact
+      res =
+        if TululStats::Entity::ENTITY_QUERY.include?(field)
+          self.entities.where(type: field).map(&:content).group_by{ |content| content }.map{ |k, v| [k, v.count] }.sort_by{ |k| k[1] }.reverse
+        else
+          self.users.sort_by{ |b| b.send("#{field}") }.reverse.map do |user|
+            sum = user.send("#{field}")
+            [user.full_name, sum] if sum > 0
+          end.compact
+        end
 
       total = res.inject(0){ |b, c| b + c[1] }.to_f
 
