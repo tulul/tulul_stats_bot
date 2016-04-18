@@ -41,7 +41,7 @@ GEM
     redis (3.2.2)
     sucker_punch (2.0.1)
       concurrent-ruby (~> 1.0.0)
-    telegram-bot-ruby (0.5.0.beta2)
+    telegram-bot-ruby (0.5.0)
       faraday
       virtus
     thread_safe (0.3.5)
@@ -61,7 +61,7 @@ DEPENDENCIES
   rake
   redis
   sucker_punch (~> 2.0)
-  telegram-bot-ruby (~> 0.5.0.beta2)
+  telegram-bot-ruby (~> 0.5.0.beta4)
 
 BUNDLED WITH
    1.11.2

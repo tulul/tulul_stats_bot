@@ -8,6 +8,8 @@ module TululStats
 
     has_many :users, class_name: 'TululStats::User'
     has_many :entities, class_name: 'TululStats::Entity'
+    has_many :hours, class_name: 'TululStats::Hour'
+    has_many :days, class_name: 'TululStats::Day'
 
     def self.get_group(message)
       self.find_or_create_by(group_id: message.chat.id)
@@ -21,10 +23,20 @@ module TululStats
       self.entities.add_new(message[entity.offset...entity.offset + entity.length], entity.type, self.id)
     end
 
+    def add_hour(hour)
+      self.hours.find_or_create_by(hour: hour).inc(count: 1)
+    end
+
+    def add_day(day)
+      self.days.find_or_create_by(day: day).inc(count: 1)
+    end
+
     def top(field)
       res =
         if TululStats::Entity::ENTITY_QUERY.include?(field)
           self.entities.where(type: field).map(&:content).group_by{ |content| content }.map{ |k, v| [k, v.count] }.sort_by{ |k| k[1] }.reverse
+        elsif TululStats::IsTime::TIME_QUERY.include?(field)
+          self.send(field.pluralize).map{ |k| [self.send("convert_#{field}", k.send(field)), k.count] }
         else
           self.users.sort_by{ |b| b.send("#{field}") }.reverse.map do |user|
             sum = user.send("#{field}")
@@ -59,6 +71,17 @@ module TululStats
       res = res.compact.join("\n")
       res = "Total #{field}: <b>#{total.to_i}</b>\n" + res unless res.empty?
       res
+    end
+
+    def convert_hour(hour)
+      suf = hour >= 12 ? ' PM' : ' AM'
+      suf += ' UTC'
+      hour %= 12 unless hour == 12
+      hour.to_s + suf
+    end
+
+    def convert_day(day)
+      Date::DAYNAMES[day]
     end
   end
 end

@@ -11,7 +11,7 @@ class TululStatsBot
 
           query = /\/top_(.+)/.match(message.text).captures[0] rescue nil
           query = query.split('@')[0] rescue nil
-          if query && (TululStats::User.fields.keys.reject{ |field| TululStats::User::EXCEPTION.include?(field) } + TululStats::Entity::ENTITY_QUERY).include?(query)
+          if query && (TululStats::User.fields.keys.reject{ |field| TululStats::User::EXCEPTION.include?(field) } + TululStats::Entity::ENTITY_QUERY + TululStats::IsTime::TIME_QUERY).include?(query)
             res = group.top(query)
             res = 'Belum cukup data' if res.gsub("\n", '').empty?
             @@bot.api.send_message(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML') rescue retry
@@ -72,6 +72,10 @@ class TululStatsBot
               user.inc_linking if entity.type == 'url'
               group.add_entity(message.text, entity) if TululStats::Entity::ENTITY_QUERY.include?(entity.type)
             end
+
+            time = Time.at(message.date).utc
+            group.add_hour(time.hour)
+            group.add_day(time.wday)
           end
         rescue StandardError => e
           puts e.message
