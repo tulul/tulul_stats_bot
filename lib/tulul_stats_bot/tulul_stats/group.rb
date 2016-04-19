@@ -32,45 +32,93 @@ module TululStats
     end
 
     def top(field)
-      res =
-        if TululStats::Entity::ENTITY_QUERY.include?(field)
-          self.entities.where(type: field).map(&:content).group_by{ |content| content }.map{ |k, v| [k, v.count] }.sort_by{ |k| k[1] }.reverse
-        elsif TululStats::IsTime::TIME_QUERY.include?(field)
-          self.send(field.pluralize).map{ |k| [self.send("convert_#{field}", k.send(field)), k.count] }
-        else
-          self.users.sort_by{ |b| b.send("#{field}") }.reverse.map do |user|
-            sum = user.send("#{field}")
-            [user.full_name, sum] if sum > 0
-          end.compact
+      if TululStats::IsTime::TIME_QUERY.include?(field)
+        count =
+          case field
+          when 'hour'
+            24
+          when 'day'
+            7
+          end
+
+        res = []
+        (0...count).each do |i|
+          res << (self.send(field.pluralize).find_by(field => i).count rescue 0)
         end
 
-      total = res.inject(0){ |b, c| b + c[1] }.to_f
-
-      rank = 0
-      prev_sum = -1
-      prev_count = 1
-
-      res.map! do |entry|
-        name = entry[0]
-        sum = entry[1]
-
-        if sum == prev_sum
-          prev_count += 1
-        else
-          rank += prev_count
-          prev_count = 1
-          prev_sum = sum
+        sum = 0
+        max = -1
+        res.each do |resi|
+          sum += resi
+          max = resi if resi > max
         end
 
-        percentage = "%.2f" % (sum * 100 / total) rescue 0
+        max_perc = (max * 100.0 / sum).ceil
+        norm = 10.0
 
-        "#{rank}. #{name}: <b>#{sum}</b> (#{percentage}%)"
+        arr = []
+        res.each do |resi|
+          cur_prec = ((resi * 100.0 / sum).ceil * norm / max_perc).ceil
+          arr << ['.'] * (norm - cur_prec) + ['|'] * cur_prec
+        end
+
+        arr = arr.transpose
+
+        ret = '<pre>'
+        arr.each do |arri|
+          ret += arri.join
+          ret += "\n"
+        end
+
+        ret +=
+          case field
+          when 'hour'
+            '0a  4a  8a   1p  5p  9p '
+          when 'day'
+            'SMTWTFS'
+          end
+
+        ret += '</pre>'
+        ret
+      else
+        res =
+          if TululStats::Entity::ENTITY_QUERY.include?(field)
+            self.entities.where(type: field).map(&:content).group_by{ |content| content }.map{ |k, v| [k, v.count] }.sort_by{ |k| k[1] }.reverse
+          else
+            self.users.sort_by{ |b| b.send("#{field}") }.reverse.map do |user|
+              sum = user.send("#{field}")
+              [user.full_name, sum] if sum > 0
+            end.compact
+          end
+
+        total = res.inject(0){ |b, c| b + c[1] }.to_f
+
+        rank = 0
+        prev_sum = -1
+        prev_count = 1
+
+        res.map! do |entry|
+          name = entry[0]
+          sum = entry[1]
+
+          if sum == prev_sum
+            prev_count += 1
+          else
+            rank += prev_count
+            prev_count = 1
+            prev_sum = sum
+          end
+
+          percentage = "%.2f" % (sum * 100 / total) rescue 0
+
+          "#{rank}. #{name}: <b>#{sum}</b> (#{percentage}%)"
+        end
+
+        field = field.gsub('ch', 'change').gsub('del', 'delete').humanize(capitalize: false).pluralize
+        res = res.compact.join("\n")
+        res = "Total #{field}: <b>#{total.to_i}</b>\n" + res unless res.empty?
+        res
       end
-
-      field = field.gsub('ch', 'change').gsub('del', 'delete').humanize(capitalize: false).pluralize
-      res = res.compact.join("\n")
-      res = "Total #{field}: <b>#{total.to_i}</b>\n" + res unless res.empty?
-      res
     end
 
     def convert_hour(hour)

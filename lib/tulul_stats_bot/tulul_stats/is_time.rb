@@ -9,8 +9,6 @@ module TululStats
 
       field :count, type: Integer, default: 0
 
-      default_scope -> { order_by(count: :desc) }
-
       belongs_to :group, class_name: 'TululStats::Group', index: true
     end
   end
