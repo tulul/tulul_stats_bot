@@ -58,8 +58,8 @@ module TululStats
 
         arr = []
         res.each do |resi|
-          cur_prec = ((resi * 100.0 / sum).ceil * norm / max_perc).ceil
-          arr << ['.'] * (norm - cur_prec) + ['|'] * cur_prec
+          cur_perc = ((resi * 100.0 / sum) * norm / max_perc).ceil
+          arr << ['.'] * (norm - cur_perc) + ['|'] * cur_perc
         end
 
         arr = arr.transpose
@@ -97,6 +97,24 @@ module TululStats
         prev_sum = -1
         prev_count = 1
 
+        max_perc = (res[0][1] * 100.0 / total).ceil rescue 0
+        norm = 10.0
+
+        arr = []
+        24.times do |i|
+          cur_perc = ((res[i][1] * 100.0 / total) * norm / max_perc).ceil rescue 0
+          arr << ['.'] * (norm - cur_perc) + ['|'] * cur_perc
+        end
+
+        arr = arr.transpose
+
+        graph = "\n\n<pre>"
+        arr.each do |arri|
+          graph += arri.join
+          graph += "\n"
+        end
+        graph += '</pre>'
+
         res.map! do |entry|
           name = entry[0]
           sum = entry[1]
@@ -117,6 +135,7 @@ module TululStats
         field = field.gsub('ch', 'change').gsub('del', 'delete').humanize(capitalize: false).pluralize
         res = res.compact.join("\n")
         res = "Total #{field}: <b>#{total.to_i}</b>\n" + res unless res.empty?
+        res += graph unless res.empty?
         res
       end
     end
