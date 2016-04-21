@@ -73,7 +73,7 @@ module TululStats
         ret +=
           case field
           when 'hour'
-            '0a  4a  8a   1p  5p  9p '
+            '0a UTC 7a     2p     9p '
           when 'day'
             'SMTWTFS'
           end
@@ -103,7 +103,9 @@ module TululStats
         arr = []
         24.times do |i|
           cur_perc = ((res[i][1] * 100.0 / total) * norm / max_perc).ceil rescue 0
-          arr << ['.'] * (norm - cur_perc) + ['|'] * cur_perc
+          ll = res[i][0][0].downcase rescue ' '
+          ll = res[i][0][1].downcase if ['#', '@'].include?(ll)
+          arr << ['.'] * (norm - cur_perc) + ['|'] * cur_perc + [ll]
         end
 
         arr = arr.transpose
