@@ -53,12 +53,12 @@ module TululStats
           max = resi if resi > max
         end
 
-        max_perc = (max * 100.0 / sum).ceil
+        max_perc = (max * 100.0 / sum).ceil rescue 0
         norm = 10.0
 
         arr = []
         res.each do |resi|
-          cur_perc = ((resi * 100.0 / sum) * norm / max_perc).ceil
+          cur_perc = ((resi * 100.0 / sum) * norm / max_perc).ceil rescue 0
           arr << ['.'] * (norm - cur_perc) + ['|'] * cur_perc
         end
 
