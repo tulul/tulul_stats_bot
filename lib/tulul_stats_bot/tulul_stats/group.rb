@@ -80,6 +80,12 @@ module TululStats
 
         ret += '</pre>'
         ret
+      elsif field.downcase == 'last_tulul'
+        rank = 0
+        self.users.reject{|b| b.last_tulul_at.nil?}.sort_by{|b| b.last_tulul_at}.inject('') do |prev, cur|
+          rank += 1
+          "#{prev}#{rank}. #{cur.full_name}: #{cur.last_tulul_at}\n"
+        end
       else
         res =
           if TululStats::Entity::ENTITY_QUERY.include?(field)

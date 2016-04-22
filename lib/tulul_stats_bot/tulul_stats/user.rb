@@ -26,6 +26,7 @@ module TululStats
     field :del_photo,         type: Integer, default: 0
     field :left_group,        type: Integer, default: 0
     field :join_group,        type: Integer, default: 0
+    field :last_tulul_at,     type: DateTime
 
     field :text,              type: Integer, default: 0
     field :audio,             type: Integer, default: 0
