@@ -69,8 +69,7 @@ class TululStatsBot
             user.inc_voice if message.voice
             user.inc_contact if message.contact
             user.inc_location if message.location
-            user.last_tulul_at = DateTime.now
-            user.save
+            user.update_attribute(:last_tulul_at, DateTime.now)
 
             message.entities.each do |entity|
               user.inc_mentioning if entity.type == 'mention'
