@@ -70,6 +70,7 @@ class TululStatsBot
             user.inc_contact if message.contact
             user.inc_location if message.location
             user.last_tulul_at = DateTime.now
+            user.save
 
             message.entities.each do |entity|
               user.inc_mentioning if entity.type == 'mention'
