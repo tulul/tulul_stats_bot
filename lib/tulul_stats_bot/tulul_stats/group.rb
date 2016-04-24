@@ -85,7 +85,7 @@ module TululStats
         self.users.reject{ |b| b.last_tulul_at.nil? }.sort_by{ |b| b.last_tulul_at }.reverse.map do |cur|
           rank += 1
           last_tulul_at = cur.last_tulul_at.utc.strftime("%y-%m-%d %H:%M UTC")
-          "#{rank}. #{cur.full_name}: #{last_tulul_at}"
+          "#{rank}. #{last_tulul_at} | #{cur.full_name}"
         end.join("\n")
       else
         res =

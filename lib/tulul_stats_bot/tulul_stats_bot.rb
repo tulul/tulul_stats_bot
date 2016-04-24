@@ -11,7 +11,7 @@ class TululStatsBot
 
           query = /\/top_(.+)/.match(message.text).captures[0] rescue nil
           query = query.split('@')[0] rescue nil
-          if /^\/last_tulul([@].+)?/.match(message.text.strip)
+          if /^\/last_tulul([@].+)?/.match(message.text && message.text.strip)
             res = group.top('last_tulul')
             res = 'Belum cukup data' if res.gsub("\n", '').strip.empty?
             @@bot.api.send_message(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML') rescue retry
