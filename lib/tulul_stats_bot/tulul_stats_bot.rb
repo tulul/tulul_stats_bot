@@ -11,7 +11,11 @@ class TululStatsBot
 
           query = /\/top_(.+)/.match(message.text).captures[0] rescue nil
           query = query.split('@')[0] rescue nil
-          if query && (TululStats::User.fields.keys.reject{ |field| TululStats::User::EXCEPTION.include?(field) } + TululStats::Entity::ENTITY_QUERY + TululStats::IsTime::TIME_QUERY).include?(query)
+          if /^\/last_tulul([@].+)?/.match(message.text.strip)
+            res = group.top('last_tulul')
+            res = 'Belum cukup data' if res.gsub("\n", '').strip.empty?
+            @@bot.api.send_message(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML') rescue retry
+          elsif query && (TululStats::User.fields.keys.reject{ |field| TululStats::User::EXCEPTION.include?(field) } + TululStats::Entity::ENTITY_QUERY + TululStats::IsTime::TIME_QUERY).include?(query)
             res = group.top(query)
             res = 'Belum cukup data' if res.gsub("\n", '').empty?
             @@bot.api.send_message(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML') rescue retry
@@ -65,6 +69,7 @@ class TululStatsBot
             user.inc_voice if message.voice
             user.inc_contact if message.contact
             user.inc_location if message.location
+            user.update_attribute(:last_tulul_at, DateTime.now)
 
             message.entities.each do |entity|
               user.inc_mentioning if entity.type == 'mention'

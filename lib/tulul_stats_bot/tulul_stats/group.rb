@@ -80,6 +80,13 @@ module TululStats
 
         ret += '</pre>'
         ret
+      elsif field.downcase == 'last_tulul'
+        rank = 0
+        self.users.reject{ |b| b.last_tulul_at.nil? }.sort_by{ |b| b.last_tulul_at }.reverse.map do |cur|
+          rank += 1
+          last_tulul_at = cur.last_tulul_at.utc.strftime("%y-%m-%d %H:%M UTC")
+          "#{rank}. #{cur.full_name}: #{last_tulul_at}"
+        end.join("\n")
       else
         res =
           if TululStats::Entity::ENTITY_QUERY.include?(field)
