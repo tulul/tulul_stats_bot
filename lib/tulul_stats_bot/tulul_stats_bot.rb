@@ -82,15 +82,29 @@ class TululStatsBot
             group.add_hour(time.hour)
             group.add_day(time.wday)
           end
-        rescue StandardError => e
-          puts e.message
-          puts e.backtrace.select{ |err| err =~ /tulul/ }.join(',')
         end
       end
     end
-  rescue StandardError => e
-    puts e.message
-    puts e.backtrace.select{ |err| err =~ /tulul/ }.join(',')
+  rescue Net::ReadTimeout => e
+    puts Time.now.utc
+    puts 'TIMEOUT'
+    sleep(2)
     retry
+  rescue Telegram::Bot::Exceptions::ResponseError => e
+    puts Time.now.utc
+    puts e.message
+    puts e.backtrace.select{ |err| err =~ /tulul/ }.join(', ')
+
+    if e.message =~ /429/
+      sleep(3)
+    elsif e.message =~ /502/
+      sleep(10)
+    end
+    retry if e.message !~ /[400|403|409]/
+  rescue StandardError => e
+    err = e.message + "\n"
+    err += e.backtrace.select{ |err| err =~ /tulul/ }.join(', ') + "\n"
+    err += Time.now.utc.to_s
+    @@bot.api.send_message(chat_id: TululStats::User.find_by(username: 'araishikeiwai').user_id, text: "EXCEPTION! CHECK SERVER! \n\n#{err}")
   end
 end
