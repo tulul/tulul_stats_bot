@@ -8,7 +8,9 @@ class TululStatsBot
       @@bot = bot
       bot.listen do |message|
         begin
-          if ALLOWED_GROUPS.call.include?(message.chat.id.to_s)
+          if message.text =~ /\/chat_id/
+            send(chat_id: message.chat.id, text: message.chat.id)
+          elsif ALLOWED_GROUPS.call.include?(message.chat.id.to_s)
             group = TululStats::Group.get_group(message)
             user = group.get_user(message.from)
 
@@ -17,11 +19,12 @@ class TululStatsBot
             if /^\/last_tulul([@].+)?/.match(message.text && message.text.strip)
               res = group.top('last_tulul')
               res = 'Belum cukup data' if res.gsub("\n", '').strip.empty?
-              @@bot.api.send_message(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML') rescue retry
+              send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML')
+
             elsif query && (TululStats::User.fields.keys.reject{ |field| TululStats::User::EXCEPTION.include?(field) } + TululStats::Entity::ENTITY_QUERY + TululStats::IsTime::TIME_QUERY).include?(query)
               res = group.top(query)
               res = 'Belum cukup data' if res.gsub("\n", '').empty?
-              @@bot.api.send_message(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML') rescue retry
+              send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML')
             else
               user.inc_message
 
@@ -86,7 +89,7 @@ class TululStatsBot
               group.add_day(time.wday)
             end
           else
-            @@bot.api.send_message(chat_id: message.chat.id, text: "You're not allowed to use this bot in your group yet, please message @araishikeiwai to ask for permission. For now, please remove the bot from the group") rescue nil
+            send(chat_id: message.chat.id, text: "You're not allowed to use this bot in your group yet, please message @araishikeiwai to ask for permission. For now, please remove the bot from the group")
           end
         end
       end
@@ -113,5 +116,27 @@ class TululStatsBot
     err += Time.now.utc.to_s
     @@bot.api.send_message(chat_id: TululStats::User.find_by(username: 'araishikeiwai').user_id, text: "EXCEPTION! CHECK SERVER! \n\n#{err}")
     retry
+  end
+
+  def self.send(options)
+    retry_count = 0
+    begin
+      @@bot.api.send_message(options)
+    rescue Faraday::TimeoutError => e
+      puts Time.now.utc
+      puts 'TIMEOUT'
+      sleep(2)
+      retry
+    rescue Telegram::Bot::Exceptions::ResponseError => e
+      puts Time.now.utc
+      puts e.message
+      puts e.backtrace.select{ |err| err =~ /tulul/ }.join(', ')
+      puts "retrying: #{retry_count}"
+
+      if e.message =~ /429/
+        sleep(3)
+      end
+      retry if e.message !~ /[400|403|409]/ && (retry_count += 1) < 20
+    end
   end
 end
