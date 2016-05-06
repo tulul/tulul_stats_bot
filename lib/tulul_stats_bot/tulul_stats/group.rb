@@ -86,7 +86,7 @@ module TululStats
           rank += 1
           last_tulul_at = cur.last_tulul_at.utc.strftime("%y-%m-%d %H:%M UTC")
           "#{rank}. #{last_tulul_at} | #{cur.full_name}"
-        end.join("\n")
+        end.join("\n")[0...4000]
       else
         res =
           if TululStats::Entity::ENTITY_QUERY.include?(field)
@@ -144,6 +144,7 @@ module TululStats
         field = field.gsub('ch', 'change').gsub('del', 'delete').humanize(capitalize: false).pluralize
         res = res.compact.join("\n")
         res = "Total #{field}: <b>#{total.to_i}</b>\n" + res unless res.empty?
+        res = res[0...3700]
         res += graph unless res.empty?
         res
       end
