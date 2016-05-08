@@ -136,7 +136,7 @@ class TululStatsBot
       if e.message =~ /429/
         sleep(3)
       end
-      retry if e.message !~ /[400|403|409]/ && (retry_count += 1) < 20
+      retry if e.message !~ /error_code: .[400|403|409]./ && (retry_count += 1) < 20
     end
   end
 end
