@@ -60,7 +60,10 @@ class TululStatsBot
               end
 
               user.inc_ch_title if message.new_chat_title
-              user.inc_ch_photo unless message.new_chat_photo.empty?
+              unless message.new_chat_photo.empty?
+                user.inc_ch_photo
+                send(chat_id: message.chat.id, text: "Hey guys, #{user.username_or_full_name} just fixed the aikon!", reply_to_message_id: message.message_id, parse_mode: 'HTML')
+              end
               user.inc_del_photo if message.delete_chat_photo
 
               group.get_user(message.left_chat_member).inc_left_group if message.left_chat_member

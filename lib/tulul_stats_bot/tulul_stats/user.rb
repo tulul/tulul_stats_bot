@@ -67,5 +67,9 @@ module TululStats
       self.last_name && res += " #{self.last_name}"
       res
     end
+
+    def username_or_full_name
+      self.username && "@#{self.username}" || self.full_name
+    end
   end
 end
