@@ -1,7 +1,7 @@
 production:
   clients:
     default:
-      database: mongoid
+      database: tulul_stats
       hosts:
         - localhost:27017
   options:
