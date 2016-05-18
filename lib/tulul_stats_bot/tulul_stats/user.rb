@@ -11,6 +11,7 @@ module TululStats
     field :qting,             type: Integer, default: 0
     field :qted,              type: Integer, default: 0
     field :leliing,           type: Integer, default: 0
+    field :slanging,          type: Integer, default: 0
     field :getting,           type: Integer, default: 0
     field :blogging,          type: Integer, default: 0
     field :luing,             type: Integer, default: 0

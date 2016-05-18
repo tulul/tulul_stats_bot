@@ -47,6 +47,10 @@ class TululStatsBot
                 user.inc_leliing
               end
 
+              if message.text =~ /^\/slang/
+                user.inc_slanging
+              end
+
               if message.text =~ /^\/get/
                 user.inc_getting
               end
