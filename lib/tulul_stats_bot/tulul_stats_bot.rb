@@ -8,7 +8,8 @@ class TululStatsBot
       @@bot = bot
       bot.listen do |message|
         begin
-          if message.text =~ /\/chat_id/
+          if !message
+          elsif message.text =~ /\/chat_id/
             send(chat_id: message.chat.id, text: message.chat.id)
           elsif ALLOWED_GROUPS.call.include?(message.chat.id.to_s)
             group = TululStats::Group.get_group(message)
