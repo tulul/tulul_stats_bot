@@ -144,8 +144,9 @@ module TululStats
           rt
         end
 
+        res = res.compact[0...10]
+        res = res.join("\n")
         field = field.gsub('ch', 'change').gsub('del', 'delete').humanize(capitalize: false).pluralize
-        res = res.compact.join("\n")
         res = "Total #{field}: <b>#{total.to_i}</b>\n" + res unless res.empty?
         res = res[0...3700]
         res += graph unless res.empty?
