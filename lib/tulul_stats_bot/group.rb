@@ -1,4 +1,4 @@
-module TululStats
+module TululStatsBot
   class Group
     include Mongoid::Document
 
@@ -6,10 +6,12 @@ module TululStats
 
     index({ group_id: 1 }, { unique: true })
 
-    has_many :users, class_name: 'TululStats::User'
-    has_many :entities, class_name: 'TululStats::Entity'
-    has_many :hours, class_name: 'TululStats::Hour'
-    has_many :days, class_name: 'TululStats::Day'
+    has_many :users, class_name: 'TululStatsBot::User'
+    has_many :entities, class_name: 'TululStatsBot::Entity'
+    has_many :hours, class_name: 'TululStatsBot::Hour'
+    has_many :days, class_name: 'TululStatsBot::Day'
+
+    store_in collection: 'tulul_stats_groups'
 
     def self.get_group(message)
       self.find_or_create_by(group_id: message.chat.id)
@@ -32,7 +34,7 @@ module TululStats
     end
 
     def top(field)
-      if TululStats::IsTime::TIME_QUERY.include?(field)
+      if IsTime::TIME_QUERY.include?(field)
         count =
           case field
           when 'hour'
@@ -89,7 +91,7 @@ module TululStats
         end.join("\n")[0...4000]
       else
         res =
-          if TululStats::Entity::ENTITY_QUERY.include?(field)
+          if Entity::ENTITY_QUERY.include?(field)
             self.entities.where(type: field).map(&:content).group_by{ |content| content }.map{ |k, v| [k, v.count, nil] }.sort_by{ |k| k[1] }.reverse
           else
             self.users.sort_by{ |b| b.send("#{field}") }.reverse.map do |user|

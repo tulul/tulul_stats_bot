@@ -1,4 +1,4 @@
-module TululStats
+module TululStatsBot
   class User
     include Mongoid::Document
 
@@ -42,7 +42,9 @@ module TululStats
     index({ user_id: 1, group_id: 1 }, { unique: true })
     index({ username: 1, group_id: 1 })
 
-    belongs_to :group, class_name: 'TululStats::Group', index: true
+    store_in collection: 'tulul_stats_users'
+
+    belongs_to :group, class_name: 'TululStatsBot::Group', index: true
 
     EXCEPTION = ['_id', 'user_id', 'group_id', 'first_name', 'last_name', 'username']
 

@@ -1,4 +1,4 @@
-module TululStats
+module TululStatsBot
   class Entity
     include Mongoid::Document
 
@@ -7,9 +7,11 @@ module TululStats
 
     index({ type: 1 })
 
-    belongs_to :group, class_name: 'TululStats::Group', index: true
+    belongs_to :group, class_name: 'TululStatsBot::Group', index: true
 
     ENTITY_QUERY = ['mention', 'hashtag', 'url']
+
+    store_in collection: 'tulul_stats_entities'
 
     def self.add_new(content, type, group_id)
       self.create(

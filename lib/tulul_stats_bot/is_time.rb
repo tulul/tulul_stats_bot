@@ -1,4 +1,4 @@
-module TululStats
+module TululStatsBot
   module IsTime
     extend ActiveSupport::Concern
 
@@ -9,7 +9,7 @@ module TululStats
 
       field :count, type: Integer, default: 0
 
-      belongs_to :group, class_name: 'TululStats::Group', index: true
+      belongs_to :group, class_name: 'TululStatsBot::Group', index: true
     end
   end
 end

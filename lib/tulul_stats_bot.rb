@@ -1,18 +1,31 @@
-class TululStatsBot
-  @@bot = nil
+require 'redis'
+require 'mongoid'
+require 'telegram/bot'
+require 'sucker_punch'
+require 'active_support/inflector'
+require 'active_support/concern'
+
+require 'tulul_stats_bot/day'
+require 'tulul_stats_bot/entity'
+require 'tulul_stats_bot/group'
+require 'tulul_stats_bot/hour'
+require 'tulul_stats_bot/user'
+
+module TululStatsBot
+  @bot = nil
 
   ALLOWED_GROUPS = -> { $redis.lrange('tulul_stats::allowed_groups', 0, -1) }
 
   def self.start
     Telegram::Bot::Client.run($token) do |bot|
-      @@bot = bot
+      @bot = bot
       bot.listen do |message|
         begin
           if !message
           elsif message.text =~ /\/chat_id/
             send(chat_id: message.chat.id, text: message.chat.id)
           elsif ALLOWED_GROUPS.call.include?(message.chat.id.to_s)
-            group = TululStats::Group.get_group(message)
+            group = Group.get_group(message)
             user = group.get_user(message.from)
 
             query = /\/top_(.+)/.match(message.text).captures[0] rescue nil
@@ -22,7 +35,7 @@ class TululStatsBot
               res = 'Belum cukup data' if res.gsub("\n", '').strip.empty?
               send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML')
 
-            elsif query && (TululStats::User.fields.keys.reject{ |field| TululStats::User::EXCEPTION.include?(field) } + TululStats::Entity::ENTITY_QUERY + TululStats::IsTime::TIME_QUERY).include?(query)
+            elsif query && (User.fields.keys.reject{ |field| User::EXCEPTION.include?(field) } + Entity::ENTITY_QUERY + IsTime::TIME_QUERY).include?(query)
               res = group.top(query)
               res = 'Belum cukup data' if res.gsub("\n", '').empty?
               send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML')
@@ -89,7 +102,7 @@ class TululStatsBot
                 user.inc_mentioning if entity.type == 'mention'
                 user.inc_hashtagging if entity.type == 'hashtag'
                 user.inc_linking if entity.type == 'url'
-                group.add_entity(message.text, entity) if TululStats::Entity::ENTITY_QUERY.include?(entity.type)
+                group.add_entity(message.text, entity) if Entity::ENTITY_QUERY.include?(entity.type)
               end
 
               time = Time.at(message.date).utc
@@ -122,14 +135,14 @@ class TululStatsBot
     err = e.message + "\n"
     err += e.backtrace.select{ |err| err =~ /tulul/ }.join(', ') + "\n"
     err += Time.now.utc.to_s
-    @@bot.api.send_message(chat_id: TululStats::User.find_by(username: 'araishikeiwai').user_id, text: "EXCEPTION! CHECK SERVER! \n\n#{err}")
+    @bot.api.send_message(chat_id: User.find_by(username: 'araishikeiwai').user_id, text: "EXCEPTION! CHECK SERVER! \n\n#{err}")
     retry
   end
 
   def self.send(options)
     retry_count = 0
     begin
-      @@bot.api.send_message(options)
+      @bot.api.send_message(options)
     rescue Faraday::TimeoutError => e
       puts Time.now.utc
       puts 'TIMEOUT'
