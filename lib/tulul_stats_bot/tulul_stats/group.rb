@@ -90,11 +90,12 @@ module TululStats
       else
         res =
           if TululStats::Entity::ENTITY_QUERY.include?(field)
-            self.entities.where(type: field).map(&:content).group_by{ |content| content }.map{ |k, v| [k, v.count] }.sort_by{ |k| k[1] }.reverse
+            self.entities.where(type: field).map(&:content).group_by{ |content| content }.map{ |k, v| [k, v.count, nil] }.sort_by{ |k| k[1] }.reverse
           else
             self.users.sort_by{ |b| b.send("#{field}") }.reverse.map do |user|
               sum = user.send("#{field}")
-              [user.full_name, sum] if sum > 0
+              ratio = field != 'message' && sum * 1.0 / user.message
+              [user.full_name, sum, ratio] if sum > 0
             end.compact
           end
 
@@ -138,7 +139,9 @@ module TululStats
 
           percentage = "%.2f" % (sum * 100 / total) rescue 0
 
-          "#{rank}. #{name}: <b>#{sum}</b> (#{percentage}%)"
+          rt = "#{rank}. #{name}: <b>#{sum}</b> (#{percentage}%)"
+          entry[2] && rt += " -- #{"%.2f" % entry[2]}"
+          rt
         end
 
         field = field.gsub('ch', 'change').gsub('del', 'delete').humanize(capitalize: false).pluralize
