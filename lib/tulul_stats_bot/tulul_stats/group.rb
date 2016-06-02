@@ -31,7 +31,7 @@ module TululStats
       self.days.find_or_create_by(day: day).inc(count: 1)
     end
 
-    def top(field)
+    def top(field, verbose = true)
       if TululStats::IsTime::TIME_QUERY.include?(field)
         count =
           case field
@@ -144,7 +144,8 @@ module TululStats
           rt
         end
 
-        res = res.compact[0...10]
+        res.compact!
+        res = res[0...10] unless verbose
         res = res.join("\n")
         field = field.gsub('ch', 'change').gsub('del', 'delete').humanize(capitalize: false).pluralize
         res = "Total #{field}: <b>#{total.to_i}</b>\n" + res unless res.empty?

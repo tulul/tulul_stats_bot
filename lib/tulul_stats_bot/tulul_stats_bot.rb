@@ -15,15 +15,16 @@ class TululStatsBot
             group = TululStats::Group.get_group(message)
             user = group.get_user(message.from)
 
-            query = /\/top_(.+)/.match(message.text).captures[0] rescue nil
-            query = query.split('@')[0] rescue nil
+            queries = /\/top_(.+)/.match(message.text).captures[0] rescue nil
+            query = queries.split(' ')[0].split('@')[0] rescue nil
+            verbose = queries.split(' ')[1] == 'verbose' rescue nil
             if /^\/last_tulul([@].+)?/.match(message.text && message.text.strip)
               res = group.top('last_tulul')
               res = 'Belum cukup data' if res.gsub("\n", '').strip.empty?
               send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML')
 
             elsif query && (TululStats::User.fields.keys.reject{ |field| TululStats::User::EXCEPTION.include?(field) } + TululStats::Entity::ENTITY_QUERY + TululStats::IsTime::TIME_QUERY).include?(query)
-              res = group.top(query)
+              res = group.top(query, verbose)
               res = 'Belum cukup data' if res.gsub("\n", '').empty?
               send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML')
             else
