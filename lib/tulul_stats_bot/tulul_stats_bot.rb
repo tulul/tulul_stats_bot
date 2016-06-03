@@ -14,8 +14,9 @@ class TululStatsBot
           elsif message.from.username == 'araishikeiwai' && message.chat.type == 'private'
             if message.text =~ /\/stats/
               query = /\/stats_(.+)/.match(message.text).captures[0] rescue nil
-              valid_query(query) && TululStats::Group.all.each do |group|
-                res = group.top(query)
+              valid_query(query) && ALLOWED_GROUPS.call.each do |group_id|
+                group = TululStats::Group.find_by(group_id: group_id.to_i)
+                res = group.top(query) rescue ''
                 res = 'Belum cukup data' if res.gsub("\n", '').empty?
                 res = "Stats #{query} for #{group.title}:\n" + res
                 send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML')
