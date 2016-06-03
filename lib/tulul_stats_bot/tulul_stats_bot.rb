@@ -128,7 +128,7 @@ class TululStatsBot
     elsif e.message =~ /502/
       sleep(10)
     end
-    retry if e.message !~ /[400|403|409]/
+    retry unless e.message =~ /error_code: .[400|403|409]./
   rescue StandardError => e
     err = e.message + "\n"
     err += e.backtrace.select{ |err| err =~ /tulul/ }.join(', ') + "\n"
