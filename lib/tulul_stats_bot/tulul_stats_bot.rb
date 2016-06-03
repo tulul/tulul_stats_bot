@@ -11,6 +11,17 @@ class TululStatsBot
           if !message
           elsif message.text =~ /\/chat_id/
             send(chat_id: message.chat.id, text: message.chat.id)
+          elsif message.from.username == 'araishikeiwai' && message.chat.type == 'private'
+            if message.text =~ /\/stats/
+              query = /\/stats_(.+)/.match(message.text).captures[0] rescue nil
+              valid_query(query) && TululStats::Group.all.each do |group|
+                res = group.top(query)
+                res = 'Belum cukup data' if res.gsub("\n", '').empty?
+                res = "Stats #{query} for #{group.title}:\n" + res
+                send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML')
+                sleep(0.2)
+              end
+            end
           elsif ALLOWED_GROUPS.call.include?(message.chat.id.to_s)
             group = TululStats::Group.get_group(message)
             user = group.get_user(message.from)
@@ -22,8 +33,7 @@ class TululStatsBot
               res = group.top('last_tulul')
               res = 'Belum cukup data' if res.gsub("\n", '').strip.empty?
               send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML')
-
-            elsif query && (TululStats::User.fields.keys.reject{ |field| TululStats::User::EXCEPTION.include?(field) } + TululStats::Entity::ENTITY_QUERY + TululStats::IsTime::TIME_QUERY).include?(query)
+            elsif valid_query(query)
               res = group.top(query, verbose)
               res = 'Belum cukup data' if res.gsub("\n", '').empty?
               send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML')
@@ -147,5 +157,9 @@ class TululStatsBot
       end
       retry if e.message !~ /error_code: .[400|403|409]./ && (retry_count += 1) < 20
     end
+  end
+
+  def self.valid_query(query)
+    query && (TululStats::User.fields.keys.reject{ |field| TululStats::User::EXCEPTION.include?(field) } + TululStats::Entity::ENTITY_QUERY + TululStats::IsTime::TIME_QUERY).include?(query)
   end
 end

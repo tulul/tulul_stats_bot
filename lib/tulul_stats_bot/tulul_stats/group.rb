@@ -3,6 +3,7 @@ module TululStats
     include Mongoid::Document
 
     field :group_id, type: Integer
+    field :title, type: String
 
     index({ group_id: 1 }, { unique: true })
 
@@ -12,7 +13,9 @@ module TululStats
     has_many :days, class_name: 'TululStats::Day'
 
     def self.get_group(message)
-      self.find_or_create_by(group_id: message.chat.id)
+      group = self.find_or_create_by(group_id: message.chat.id)
+      group.update_attribute(:title, message.chat.title)
+      group
     end
 
     def get_user(user)
