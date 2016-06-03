@@ -143,7 +143,7 @@ module TululStats
           percentage = "%.2f" % (sum * 100 / total) rescue 0
 
           rt = "#{rank}. #{name}: <b>#{sum}</b> (#{percentage}%)"
-          entry[2] && rt += " -- #{"%.2f" % entry[2]}"
+          entry[2] && rt += " -- #{"%.3f" % entry[2]}"
           rt
         end
 
