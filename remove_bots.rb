@@ -1,2 +1,2 @@
 load 'Rakefile'
-TululStats::User.where(username: /bot$/).each(&:destroy)
+TululStats::User.where(username: /bot$/i).each(&:destroy)
