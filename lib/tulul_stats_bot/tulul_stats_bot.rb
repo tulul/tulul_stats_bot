@@ -29,13 +29,14 @@ class TululStatsBot
 
             queries = /\/top_(.+)/.match(message.text).captures[0] rescue nil
             query = queries.split(' ')[0].split('@')[0] rescue nil
-            verbose = queries.split(' ')[1] == 'verbose' rescue nil
             if /^\/last_tulul([@].+)?/.match(message.text && message.text.strip)
               res = group.top('last_tulul')
               res = 'Belum cukup data' if res.gsub("\n", '').strip.empty?
               send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML')
             elsif valid_query(query)
-              res = group.top(query, verbose)
+              options = queries.split(' ')[1..-1]
+              options = Hash[*options.map{ |opt| [opt.to_sym, true] }.flatten]
+              res = group.top(query, options)
               res = 'Belum cukup data' if res.gsub("\n", '').empty?
               send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML')
             else

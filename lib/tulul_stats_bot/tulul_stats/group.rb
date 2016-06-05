@@ -34,7 +34,7 @@ module TululStats
       self.days.find_or_create_by(day: day).inc(count: 1)
     end
 
-    def top(field, verbose = true)
+    def top(field, verbose: true, ratio: false)
       if TululStats::IsTime::TIME_QUERY.include?(field)
         count =
           case field
@@ -97,8 +97,8 @@ module TululStats
           else
             self.users.sort_by{ |b| b.send("#{field}") }.reverse.map do |user|
               sum = user.send("#{field}")
-              ratio = field != 'message' && sum * 1.0 / user.message
-              [user.full_name, sum, ratio] if sum > 0
+              ratio_lo = field != 'message' && sum * 1.0 / user.message
+              [user.full_name, sum, ratio_lo] if sum > 0
             end.compact
           end
 
@@ -128,6 +128,7 @@ module TululStats
         end
         graph += '</pre>'
 
+        res = res.sort_by{ |re| [re[2] || 0, re[1]] }.reverse if ratio
         res.map! do |entry|
           name = entry[0]
           sum = entry[1]
