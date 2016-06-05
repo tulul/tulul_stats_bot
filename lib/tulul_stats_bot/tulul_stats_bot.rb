@@ -12,18 +12,34 @@ class TululStatsBot
           elsif message.text =~ /\/chat_id/
             send(chat_id: message.chat.id, text: message.chat.id)
           elsif message.from.username == 'araishikeiwai' && message.chat.type == 'private'
-            if message.text =~ /\/stats/
-              query = /\/stats_(.+)/.match(message.text).captures[0] rescue nil
-              valid_query(query) && ALLOWED_GROUPS.call.each do |group_id|
+            if message.text == '/list'
+              list_groups(message.chat.id)
+            elsif message.text =~ /\/set_allow/
+              group_id = message.text.split(' ')[1]
+              group_id && $redis.set("tulul_stats::allowed_groups::#{group_id}", 1)
+              list_groups(message.chat.id)
+            elsif message.text =~ /\/set_disallow/
+              group_id = message.text.split(' ')[1]
+              group_id && $redis.del("tulul_stats::allowed_groups::#{group_id}")
+              list_groups(message.chat.id)
+            else
+              puts "here"
+              puts message.inspect
+              query, group_id, *options = message.text.gsub('/', '').split(' ')
+              puts query.inspect
+              puts group_id.inspect
+              puts options.inspect
+              options = Hash[*options.map{ |opt| [opt.to_sym, true] }.flatten]
+              if valid_query(query) && allowed_group?(group_id)
                 group = TululStats::Group.find_by(group_id: group_id.to_i)
-                res = group.top(query) rescue ''
+                res = group.top(query, options)
                 res = 'Belum cukup data' if res.gsub("\n", '').empty?
                 res = "Stats #{query} for #{group.title}:\n" + res
                 send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id)
                 sleep(0.2)
               end
             end
-          elsif ALLOWED_GROUPS.call.include?(message.chat.id.to_s)
+          elsif allowed_group?(message.chat.id)
             group = TululStats::Group.get_group(message)
             user = group.get_user(message.from)
 
@@ -167,5 +183,16 @@ class TululStatsBot
 
   def self.valid_query(query)
     query && (TululStats::User.fields.keys.reject{ |field| TululStats::User::EXCEPTION.include?(field) } + TululStats::Entity::ENTITY_QUERY + TululStats::IsTime::TIME_QUERY).include?(query)
+  end
+
+  def self.allowed_group?(group_id)
+    $redis.get("tulul_stats::allowed_groups::#{group_id}")
+  end
+
+  def self.list_groups(chat_id)
+    check = "\xE2\x9C\x94"
+    cross = "\xE2\x9C\x96"
+    list = TululStats::Group.all.map{ |gr| "#{allowed_group?(gr.group_id) ? check : cross} #{gr.group_id}: #{gr.title}"}.join("\n")
+    send(chat_id: chat_id, text: list)
   end
 end
