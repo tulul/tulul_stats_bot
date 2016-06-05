@@ -93,7 +93,7 @@ module TululStats
       else
         res =
           if TululStats::Entity::ENTITY_QUERY.include?(field)
-            self.entities.where(type: field).map(&:content).group_by{ |content| content }.map{ |k, v| [k, v.count, nil] }.sort_by{ |k| k[1] }.reverse
+            self.entities.where(type: field).map(&:content).group_by{ |content| content.downcase }.map{ |k, v| [k, v.count, nil] }.sort_by{ |k| k[1] }.reverse
           else
             self.users.sort_by{ |b| b.send("#{field}") }.reverse.map do |user|
               sum = user.send("#{field}")
