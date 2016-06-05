@@ -34,7 +34,7 @@ module TululStats
       self.days.find_or_create_by(day: day).inc(count: 1)
     end
 
-    def top(field, verbose: false, ratio: false)
+    def top(field, verbose: false, ratio: false, big_graph: false, **args)
       if TululStats::IsTime::TIME_QUERY.include?(field)
         count =
           case field
@@ -58,6 +58,7 @@ module TululStats
 
         max_perc = (max * 100.0 / sum).ceil rescue 0
         norm = 10.0
+        norm *= 2 if big_graph
 
         arr = []
         res.each do |resi|
@@ -110,9 +111,12 @@ module TululStats
 
         max_perc = (res[0][1] * 100.0 / total).ceil rescue 0
         norm = 10.0
+        norm *= 2 if big_graph
+        graph_size = 24
+        graph_size *= 2 if big_graph
 
         arr = []
-        24.times do |i|
+        graph_size.times do |i|
           cur_perc = ((res[i][1] * 100.0 / total) * norm / max_perc).ceil rescue 0
           ll = res[i][0][0].downcase rescue ' '
           ll = res[i][0][1].downcase if ['#', '@'].include?(ll)
@@ -153,7 +157,7 @@ module TululStats
         res = res.join("\n")
         field = field.gsub('ch', 'change').gsub('del', 'delete').humanize(capitalize: false).pluralize
         res = "Total #{field}: <b>#{total.to_i}</b>\n" + res unless res.empty?
-        res = res[0...3700]
+        res = res[0...(4000 - graph.length)]
         res += graph unless res.empty?
         res
       end
