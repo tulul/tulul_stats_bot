@@ -23,12 +23,7 @@ class TululStatsBot
               group_id && $redis.del("tulul_stats::allowed_groups::#{group_id}")
               list_groups(message.chat.id)
             else
-              puts "here"
-              puts message.inspect
               query, group_id, *options = message.text.gsub('/', '').split(' ')
-              puts query.inspect
-              puts group_id.inspect
-              puts options.inspect
               options = Hash[*options.map{ |opt| [opt.to_sym, true] }.flatten]
               if valid_query(query) && allowed_group?(group_id)
                 group = TululStats::Group.find_by(group_id: group_id.to_i)
