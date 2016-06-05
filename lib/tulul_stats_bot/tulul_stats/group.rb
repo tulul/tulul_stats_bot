@@ -34,7 +34,7 @@ module TululStats
       self.days.find_or_create_by(day: day).inc(count: 1)
     end
 
-    def top(field, verbose: true, ratio: false)
+    def top(field, verbose: false, ratio: false)
       if TululStats::IsTime::TIME_QUERY.include?(field)
         count =
           case field
