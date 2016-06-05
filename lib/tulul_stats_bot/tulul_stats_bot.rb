@@ -19,7 +19,7 @@ class TululStatsBot
                 res = group.top(query) rescue ''
                 res = 'Belum cukup data' if res.gsub("\n", '').empty?
                 res = "Stats #{query} for #{group.title}:\n" + res
-                send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML')
+                send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id)
                 sleep(0.2)
               end
             end
@@ -32,13 +32,13 @@ class TululStatsBot
             if /^\/last_tulul([@].+)?/.match(message.text && message.text.strip)
               res = group.top('last_tulul')
               res = 'Belum cukup data' if res.gsub("\n", '').strip.empty?
-              send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML')
+              send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id)
             elsif valid_query(query)
               options = queries.split(' ')[1..-1]
               options = Hash[*options.map{ |opt| [opt.to_sym, true] }.flatten]
               res = group.top(query, options)
               res = 'Belum cukup data' if res.gsub("\n", '').empty?
-              send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id, parse_mode: 'HTML')
+              send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id)
             else
               user.inc_message
 
@@ -80,7 +80,7 @@ class TululStatsBot
               user.inc_ch_title if message.new_chat_title
               unless message.new_chat_photo.empty?
                 user.inc_ch_photo
-                send(chat_id: message.chat.id, text: "Hey guys, #{user.username_or_full_name} just fixed the aikon!", reply_to_message_id: message.message_id, parse_mode: 'HTML')
+                send(chat_id: message.chat.id, text: "Hey guys, #{user.username_or_full_name} just fixed the aikon!", reply_to_message_id: message.message_id)
               end
               user.inc_del_photo if message.delete_chat_photo
 
@@ -142,6 +142,10 @@ class TululStatsBot
   def self.send(options)
     retry_count = 0
     begin
+      options.merge!({
+        parse_mode: 'HTML',
+        disable_web_page_preview: true
+      })
       @@bot.api.send_message(options)
     rescue Faraday::TimeoutError => e
       puts Time.now.utc
