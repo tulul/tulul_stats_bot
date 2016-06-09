@@ -59,7 +59,8 @@ class TululStatsBot
 
                 if message.text =~ /#qt/i
                   user.inc_qting
-                  group.get_user(message.reply_to_message.from).inc_qted
+                  qted = message.reply_to_message.forward_from || message.reply_to_message.from
+                  group.get_user(qted).inc_qted
                 end
               end
 
@@ -80,11 +81,15 @@ class TululStatsBot
                 user.inc_getting
               end
 
-              if message.text =~ /<.*blog.*>/
-                user.inc_blogging
+              if message.text =~ /<.*blog.*>/i
+                if message.reply_to_message
+                  group.get_user(message.reply_to_message.from).inc_blogging
+                else
+                  user.inc_blogging
+                end
               end
 
-              if message.text =~ / lu.?$/
+              if message.text =~ / lu[^A-Za-z]*$/i
                 user.inc_luing
               end
 
