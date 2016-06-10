@@ -93,7 +93,7 @@ class TululStatsBot
                 user.inc_luing
               end
 
-              if message.text =~ /^\d+ shitty messages?/i
+              if message.text =~ /\d+k?\+* shitty messages?/i
                 user.inc_latecomer
               end
 
