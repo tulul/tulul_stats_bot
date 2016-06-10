@@ -93,6 +93,10 @@ class TululStatsBot
                 user.inc_luing
               end
 
+              if message.text =~ /^\d+ shitty messages?/i
+                user.inc_latecomer
+              end
+
               user.inc_ch_title if message.new_chat_title
               unless message.new_chat_photo.empty?
                 user.inc_ch_photo
