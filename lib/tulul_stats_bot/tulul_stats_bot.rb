@@ -97,6 +97,14 @@ class TululStatsBot
                 user.inc_latecomer
               end
 
+              if message.text =~ /#honestquestion/i
+                if message.reply_to_message
+                  group.get_user(message.reply_to_message.from).inc_honest_asker
+                else
+                  user.inc_honest_asker
+                end
+              end
+
               if message.new_chat_title
                 user.inc_ch_title
                 res = '#TululTitle'
