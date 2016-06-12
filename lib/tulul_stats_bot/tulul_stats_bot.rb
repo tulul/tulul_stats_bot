@@ -97,7 +97,21 @@ class TululStatsBot
                 user.inc_latecomer
               end
 
-              user.inc_ch_title if message.new_chat_title
+              if message.new_chat_title
+                user.inc_ch_title
+                res = '#TululTitle'
+                unless group.last_title_change == -1
+                  t = message.date - group.last_title_change
+                  mm, ss = t.divmod(60)
+                  hh, mm = mm.divmod(60)
+                  dd, hh = hh.divmod(24)
+                  time = "%dd %dh %dm %ds" % [dd, hh, mm, ss]
+                  res += "\nPrevious title lifetime: #{time}" unless group.last_title_change == -1
+                end
+                send(chat_id: message.chat.id, text: res)
+                group.update_attribute(:last_title_change, message.date)
+              end
+
               unless message.new_chat_photo.empty?
                 user.inc_ch_photo
                 send(chat_id: message.chat.id, text: "Hey guys, #{user.username_or_full_name} just fixed the aikon!", reply_to_message_id: message.message_id)
