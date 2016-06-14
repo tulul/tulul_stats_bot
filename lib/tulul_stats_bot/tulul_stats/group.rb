@@ -5,6 +5,7 @@ module TululStats
     field :group_id, type: Integer
     field :title, type: String
     field :last_title_change, type: Integer, default: -1
+    field :last_photo_change, type: Integer, default: -1
 
     index({ group_id: 1 }, { unique: true })
 

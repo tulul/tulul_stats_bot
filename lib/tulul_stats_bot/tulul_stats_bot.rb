@@ -114,7 +114,7 @@ class TululStatsBot
                   hh, mm = mm.divmod(60)
                   dd, hh = hh.divmod(24)
                   time = "%dd %dh %dm %ds" % [dd, hh, mm, ss]
-                  res += "\nPrevious title lifetime: #{time}" unless group.last_title_change == -1
+                  res += "\nPrevious title lifetime: #{time}"
                 end
                 send(chat_id: message.chat.id, text: res)
                 group.update_attribute(:last_title_change, message.date)
@@ -122,9 +122,33 @@ class TululStatsBot
 
               unless message.new_chat_photo.empty?
                 user.inc_ch_photo
-                send(chat_id: message.chat.id, text: "Hey guys, #{user.username_or_full_name} just fixed the aikon!", reply_to_message_id: message.message_id)
+                res = "Hey guys, #{user.username_or_full_name} just fixed the aikon! #TululPhoto"
+                unless group.last_photo_change == -1
+                  t = message.date - group.last_photo_change
+                  mm, ss = t.divmod(60)
+                  hh, mm = mm.divmod(60)
+                  dd, hh = hh.divmod(24)
+                  time = "%dd %dh %dm %ds" % [dd, hh, mm, ss]
+                  res += "\nPrevious photo lifetime: #{time}"
+                end
+                send(chat_id: message.chat.id, text: res)
+                group.update_attribute(:last_photo_change, message.date)
               end
-              user.inc_del_photo if message.delete_chat_photo
+
+              if message.delete_chat_photo
+                user.inc_del_photo
+                res = "Hey guys, #{user.username_or_full_name} just abolished the aikon! #TululPhoto"
+                unless group.last_photo_change == -1
+                  t = message.date - group.last_photo_change
+                  mm, ss = t.divmod(60)
+                  hh, mm = mm.divmod(60)
+                  dd, hh = hh.divmod(24)
+                  time = "%dd %dh %dm %ds" % [dd, hh, mm, ss]
+                  res += "\nPrevious photo lifetime: #{time}"
+                end
+                send(chat_id: message.chat.id, text: res)
+                group.update_attribute(:last_photo_change, message.date)
+              end
 
               group.get_user(message.left_chat_member).inc_left_group if message.left_chat_member
               group.get_user(message.new_chat_member).inc_join_group if message.new_chat_member
