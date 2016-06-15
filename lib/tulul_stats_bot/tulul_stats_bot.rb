@@ -25,6 +25,7 @@ class TululStatsBot
             else
               query, group_id, *options = message.text.gsub('/', '').split(' ')
               options = Hash[*options.map{ |opt| [opt.to_sym, true] }.flatten]
+              options.merge!({ from_id: 78028868 })
               if valid_query(query) && allowed_group?(group_id)
                 group = TululStats::Group.find_by(group_id: group_id.to_i)
                 res = group.top(query, options)
@@ -47,6 +48,7 @@ class TululStatsBot
             elsif valid_query(query)
               options = queries.split(' ')[1..-1]
               options = Hash[*options.map{ |opt| [opt.to_sym, true] }.flatten]
+              options.merge!({ from_id: user.user_id })
               res = group.top(query, options)
               res = 'Belum cukup data' if res.gsub("\n", '').empty?
               send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id)
@@ -174,6 +176,8 @@ class TululStatsBot
               time = Time.at(message.date).utc
               group.add_hour(time.hour)
               group.add_day(time.wday)
+              user.add_hour(time.hour)
+              user.add_day(time.wday)
             end
           else
             send(chat_id: message.chat.id, text: "You're not allowed to use this bot in your group yet, please message @araishikeiwai to ask for permission. For now, please remove the bot from the group")

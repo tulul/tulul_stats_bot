@@ -1,6 +1,7 @@
 module TululStats
   class User
     include Mongoid::Document
+    include HasTime
 
     field :user_id,           type: Integer
     field :first_name,        type: String

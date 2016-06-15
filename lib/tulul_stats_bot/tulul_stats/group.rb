@@ -1,6 +1,7 @@
 module TululStats
   class Group
     include Mongoid::Document
+    include HasTime
 
     field :group_id, type: Integer
     field :title, type: String
@@ -11,8 +12,6 @@ module TululStats
 
     has_many :users, class_name: 'TululStats::User'
     has_many :entities, class_name: 'TululStats::Entity'
-    has_many :hours, class_name: 'TululStats::Hour'
-    has_many :days, class_name: 'TululStats::Day'
 
     def self.get_group(message)
       group = self.find_or_create_by(group_id: message.chat.id)
@@ -28,15 +27,7 @@ module TululStats
       self.entities.add_new(message[entity.offset...entity.offset + entity.length], entity.type, self.id)
     end
 
-    def add_hour(hour)
-      self.hours.find_or_create_by(hour: hour).inc(count: 1)
-    end
-
-    def add_day(day)
-      self.days.find_or_create_by(day: day).inc(count: 1)
-    end
-
-    def top(field, verbose: false, ratio: false, big_graph: false, **args)
+    def top(field, from_id: nil, verbose: false, ratio: false, big_graph: false, own: false, **args)
       if TululStats::IsTime::TIME_QUERY.include?(field)
         count =
           case field
@@ -47,8 +38,9 @@ module TululStats
           end
 
         res = []
+        obj = own ? self.users.find_by(user_id: from_id) : self
         (0...count).each do |i|
-          res << (self.send(field.pluralize).find_by(field => i).count rescue 0)
+          res << (obj.send(field.pluralize).find_by(field => i).count rescue 0)
         end
 
         sum = 0
