@@ -83,7 +83,7 @@ class TululStatsBot
                 user.inc_getting
               end
 
-              if message.text =~ /<.*blog.*>/i
+              if message.text =~ /<.*blog.*>/i || message.text =~ /%blog/i
                 if message.reply_to_message
                   group.get_user(message.reply_to_message.from).inc_blogging
                 else
