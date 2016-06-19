@@ -14,9 +14,7 @@ module TululStats
     has_many :entities, class_name: 'TululStats::Entity'
 
     def self.get_group(message)
-      group = self.find_or_create_by(group_id: message.chat.id)
-      group.update_attribute(:title, message.chat.title)
-      group
+      self.find_or_create_by(group_id: message.chat.id)
     end
 
     def get_user(user)
@@ -25,6 +23,12 @@ module TululStats
 
     def add_entity(message, entity)
       self.entities.add_new(message[entity.offset...entity.offset + entity.length], entity.type, self.id)
+    end
+
+    def update_title(new_title)
+      old_title = self.title
+      self.update_attribute(:title, new_title)
+      [old_title, new_title]
     end
 
     def top(field, from_id: nil, verbose: false, ratio: false, big_graph: false, own: false, **args)
