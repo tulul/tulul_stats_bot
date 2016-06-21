@@ -25,7 +25,7 @@ module TululStats
       self.entities.add_new(message[entity.offset...entity.offset + entity.length], entity.type, self.id)
     end
 
-    def update_title(new_title)
+    def update_title!(new_title)
       old_title = self.title
       self.update_attribute(:title, new_title)
       [old_title, new_title]

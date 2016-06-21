@@ -108,10 +108,10 @@ class TululStatsBot
               end
 
               if message.new_chat_title
-                old_title, new_title = group.update_title(message.chat.title)
+                old_title, new_title = group.update_title!(message.chat.title)
 
-                old_title.gsub!(/ ?H-\d+ ?/, '')
-                new_title.gsub!(/ ?H-\d+ ?/, '')
+                old_title.gsub!(/H-\d+/, '')
+                new_title.gsub!(/H-\d+/, '')
                 title_changed = old_title != new_title
 
                 user.inc_ch_title
@@ -125,7 +125,7 @@ class TululStatsBot
                   res += "\nPrevious title lifetime: #{time}"
                 end
                 send(chat_id: message.chat.id, text: res)
-                group.update_attribute(:last_title_change, message.date) if title_changed
+                group.update_attribute(:last_title_change, message.date) if title_changed || group.last_title_change == -1
               end
 
               unless message.new_chat_photo.empty?
