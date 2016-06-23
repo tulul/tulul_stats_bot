@@ -14,7 +14,9 @@ module TululStats
     has_many :entities, class_name: 'TululStats::Entity'
 
     def self.get_group(message)
-      self.find_or_create_by(group_id: message.chat.id)
+      group = self.find_or_create_by(group_id: message.chat.id)
+      group.update_attribute(:title, message.chat.title) unless group.title
+      group
     end
 
     def get_user(user)
