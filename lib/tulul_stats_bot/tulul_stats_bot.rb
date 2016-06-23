@@ -2,6 +2,7 @@ class TululStatsBot
   @@bot = nil
 
   ALLOWED_GROUPS = -> { $redis.lrange('tulul_stats::allowed_groups', 0, -1) }
+  ALLOWED_DELAY = -> { (res = $redis.get('tulul_stats::allowed_delay')) ? res.to_i : 20 }
 
   def self.start
     Telegram::Bot::Client.run($token) do |bot|
@@ -44,7 +45,7 @@ class TululStatsBot
             if /^\/last_tulul([@].+)?/.match(message.text && message.text.strip)
               res = group.top('last_tulul')
               res = 'Belum cukup data' if res.gsub("\n", '').strip.empty?
-              send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id)
+              send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id) if tulul?(message)
             elsif valid_query(query)
               options = queries.split(' ')[1..-1]
               options = Hash[*options.map{ |opt| [opt.to_sym, true] }.flatten]
@@ -124,7 +125,7 @@ class TululStatsBot
                   time = "%dd %dh %dm %ds" % [dd, hh, mm, ss]
                   res += "\nPrevious title lifetime: #{time}"
                 end
-                send(chat_id: message.chat.id, text: res)
+                send(chat_id: message.chat.id, text: res) if tulul?(message)
                 group.update_attribute(:last_title_change, message.date) if title_changed || group.last_title_change == -1
               end
 
@@ -139,7 +140,7 @@ class TululStatsBot
                   time = "%dd %dh %dm %ds" % [dd, hh, mm, ss]
                   res += "\nPrevious photo lifetime: #{time}"
                 end
-                send(chat_id: message.chat.id, text: res)
+                send(chat_id: message.chat.id, text: res) if tulul?(message)
                 group.update_attribute(:last_photo_change, message.date)
               end
 
@@ -154,7 +155,7 @@ class TululStatsBot
                   time = "%dd %dh %dm %ds" % [dd, hh, mm, ss]
                   res += "\nPrevious photo lifetime: #{time}"
                 end
-                send(chat_id: message.chat.id, text: res)
+                send(chat_id: message.chat.id, text: res) if tulul?(message)
                 group.update_attribute(:last_photo_change, message.date)
               end
 
@@ -184,6 +185,10 @@ class TululStatsBot
               group.add_day(time.wday)
               user.add_hour(time.hour)
               user.add_day(time.wday)
+
+              if tulul?(message) && message.text =~ /mau nge-?blog/i && Time.now.to_i - message.date < ALLOWED_DELAY.call
+                send(chat_id: message.chat.id, text: 'どうぞ')
+              end
             end
           else
             send(chat_id: message.chat.id, text: "You're not allowed to use this bot in your group yet, please message @araishikeiwai to ask for permission. For now, please remove the bot from the group")
@@ -247,6 +252,10 @@ class TululStatsBot
 
   def self.allowed_group?(group_id)
     $redis.get("tulul_stats::allowed_groups::#{group_id}")
+  end
+
+  def self.tulul?(message)
+    [-12126542, -136614216].include?(message.chat.id)
   end
 
   def self.list_groups(chat_id)
