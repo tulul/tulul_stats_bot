@@ -18,6 +18,7 @@ module TululStats
     field :luing,             type: Integer, default: 0
     field :latecomer,         type: Integer, default: 0
     field :honest_asker,      type: Integer, default: 0
+    field :keong_caller,      type: Integer, default: 0
     field :mentioning,        type: Integer, default: 0
     field :hashtagging,       type: Integer, default: 0
     field :linking,           type: Integer, default: 0

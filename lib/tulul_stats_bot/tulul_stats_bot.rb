@@ -191,6 +191,7 @@ class TululStatsBot
               end
 
               if tulul?(message) && message.text =~ /^hah\??$/i && Time.now.to_i - message.date < ALLOWED_DELAY.call
+                user.inc_keong_caller
                 @@bot.api.forward_message(chat_id: message.chat.id, from_chat_id: -12126542, message_id: 102972)
               end
             end
