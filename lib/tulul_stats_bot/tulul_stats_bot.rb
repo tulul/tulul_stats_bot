@@ -190,7 +190,7 @@ class TululStatsBot
                 send(chat_id: message.chat.id, text: 'どうぞ')
               end
 
-              if tulul?(message) && message.text&.gsub(/[^A-Za-z]/, '') =~ /^hah$/i && Time.now.to_i - message.date < ALLOWED_DELAY.call
+              if tulul?(message) && message.text&.gsub(/[^A-Za-z]/, '') =~ /^h+a+h+$/i && Time.now.to_i - message.date < ALLOWED_DELAY.call
                 user.inc_keong_caller
                 group.users.find_by(user_id: 88878925).inc_forwarded
                 @@bot.api.forward_message(chat_id: message.chat.id, from_chat_id: -12126542, message_id: 102972)
