@@ -189,6 +189,10 @@ class TululStatsBot
               if tulul?(message) && message.text =~ /mau nge-?blog/i && Time.now.to_i - message.date < ALLOWED_DELAY.call
                 send(chat_id: message.chat.id, text: 'どうぞ')
               end
+
+              if tulul?(message) && message.text =~ /^hah\??$/i && Time.now.to_i - message.date < ALLOWED_DELAY.call
+                @@bot.api.forward_message(chat_id: message.chat.id, from_chat_id: -12126542, message_id: 102972)
+              end
             end
           else
             send(chat_id: message.chat.id, text: "You're not allowed to use this bot in your group yet, please message @araishikeiwai to ask for permission. For now, please remove the bot from the group")
