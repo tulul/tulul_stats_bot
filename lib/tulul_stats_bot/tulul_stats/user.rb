@@ -13,6 +13,7 @@ module TululStats
     field :qted,              type: Integer, default: 0
     field :leliing,           type: Integer, default: 0
     field :slanging,          type: Integer, default: 0
+    field :kbbiing,           type: Integer, default: 0
     field :getting,           type: Integer, default: 0
     field :blogging,          type: Integer, default: 0
     field :luing,             type: Integer, default: 0
@@ -57,7 +58,8 @@ module TululStats
     end
 
     def self.get(user, group_id)
-      res = self.find_or_create_by(user_id: user.id, group_id: group_id)
+      user_id = user.peer_id rescue user.id
+      res = self.find_or_create_by(user_id: user_id, group_id: group_id)
 
       res.first_name = user.first_name
       res.last_name = user.last_name

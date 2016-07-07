@@ -159,7 +159,7 @@ module TululStats
         res = "Total #{field}: <b>#{total.to_i}</b>\n" + res unless res.empty?
         res = res[0...(4000 - graph.length)]
         last_tag = res.rindex(/<.+>/)
-        if res[last_tag + 1] != '/'
+        if last_tag && res[last_tag + 1] != '/'
           closing_tag = res.rindex(/>/)
           res.slice!(last_tag..closing_tag)
         end

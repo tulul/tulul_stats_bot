@@ -5,6 +5,7 @@ require 'telegram/bot'
 require 'sucker_punch'
 require 'active_support/inflector'
 require 'active_support/concern'
+require 'ostruct'
 
 require File.dirname(__FILE__) + '/config/init.rb'
 require File.dirname(__FILE__) + '/lib/tulul_stats_bot/tulul_stats/is_time.rb'

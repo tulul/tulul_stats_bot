@@ -76,6 +76,10 @@ class TululStatsBot
                 user.inc_leliing
               end
 
+              if message.text =~ /^\/kbbi/
+                user.inc_kbbiing
+              end
+
               if message.text =~ /^\/slang/
                 user.inc_slanging
               end
@@ -171,7 +175,7 @@ class TululStatsBot
               user.inc_voice if message.voice
               user.inc_contact if message.contact
               user.inc_location if message.location
-              user.update_attribute(:last_tulul_at, DateTime.now)
+              user.update_attribute(:last_tulul_at, DateTime.strptime(message.date.to_s, "%s"))
 
               message.entities.each do |entity|
                 user.inc_mentioning if entity.type == 'mention'
