@@ -98,7 +98,7 @@ module TululStats
           else
             self.users.sort_by{ |b| b.send("#{field}") }.reverse.map do |user|
               sum = user.send("#{field}")
-              ratio_lo = field != 'message' && sum * 1.0 / user.message
+              ratio_lo = field != 'message' && get_ratio(sum, user.message)
               [user.full_name, sum, ratio_lo] if sum > 0
             end.compact
           end
@@ -175,6 +175,15 @@ module TululStats
 
     def convert_day(day)
       Date::DAYNAMES[day]
+    end
+
+    def get_ratio(sum, total)
+      return 0 if total == 0
+
+      z = 1.96
+      phat = [1.0 * sum / total, 1.0].min
+
+      (phat + z * z / (2 * total) - z * Math.sqrt((phat * (1 - phat) + z * z / (4 * total)) / total)) / (1 + z * z / total)
     end
   end
 end
