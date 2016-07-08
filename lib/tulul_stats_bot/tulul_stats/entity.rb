@@ -21,9 +21,9 @@ module TululStats
 
     def content
       if self.type == 'url'
-        return self[:content].match(/^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)/).captures[0]
+        return self[:content].match(/^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)/).captures[0] rescue ''
       end
-      self[:content]
+      self[:content] || ''
     end
   end
 end
