@@ -157,11 +157,9 @@ module TululStats
         res = res.join("\n")
         field = field.gsub('ch', 'change').gsub('del', 'delete').humanize(capitalize: false).pluralize
         res = "Total #{field}: <b>#{total.to_i}</b>\n" + res unless res.empty?
-        res = res[0...(4000 - graph.length)]
-        last_tag = res.rindex(/<.+>/)
-        if last_tag && res[last_tag + 1] != '/'
-          closing_tag = res.rindex(/>/)
-          res.slice!(last_tag..closing_tag)
+        if res.length + graph.length > 4000
+          res.gsub!(/<\/?b>/, '')
+          res = res[0...(4000 - graph.length)]
         end
         res += graph unless res.empty?
         res
