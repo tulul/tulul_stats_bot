@@ -45,14 +45,14 @@ class TululStatsBot
             if /^\/last_tulul([@].+)?/.match(message.text && message.text.strip)
               res = group.top('last_tulul')
               res = 'Belum cukup data' if res.gsub("\n", '').strip.empty?
-              send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id) if tulul?(message)
+              send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id) if tulul?(message) && Time.now.to_i - message.date < ALLOWED_DELAY.call
             elsif valid_query(query)
               options = queries.split(' ')[1..-1]
               options = Hash[*options.map{ |opt| [opt.to_sym, true] }.flatten]
               options.merge!({ from_id: user.user_id })
               res = group.top(query, options)
               res = 'Belum cukup data' if res.gsub("\n", '').empty?
-              send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id)
+              send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id) if Time.now.to_i - message.date < ALLOWED_DELAY.call
             else
               user.inc_message
 
@@ -129,7 +129,7 @@ class TululStatsBot
                   time = "%dd %dh %dm %ds" % [dd, hh, mm, ss]
                   res += "\nPrevious title lifetime: #{time}"
                 end
-                send(chat_id: message.chat.id, text: res) if tulul?(message)
+                send(chat_id: message.chat.id, text: res) if tulul?(message) && Time.now.to_i - message.date < ALLOWED_DELAY.call
                 group.update_attribute(:last_title_change, message.date) if title_changed || group.last_title_change == -1
               end
 
@@ -144,7 +144,7 @@ class TululStatsBot
                   time = "%dd %dh %dm %ds" % [dd, hh, mm, ss]
                   res += "\nPrevious photo lifetime: #{time}"
                 end
-                send(chat_id: message.chat.id, text: res) if tulul?(message)
+                send(chat_id: message.chat.id, text: res) if tulul?(message) && Time.now.to_i - message.date < ALLOWED_DELAY.call
                 group.update_attribute(:last_photo_change, message.date)
               end
 
@@ -159,7 +159,7 @@ class TululStatsBot
                   time = "%dd %dh %dm %ds" % [dd, hh, mm, ss]
                   res += "\nPrevious photo lifetime: #{time}"
                 end
-                send(chat_id: message.chat.id, text: res) if tulul?(message)
+                send(chat_id: message.chat.id, text: res) if tulul?(message) && Time.now.to_i - message.date < ALLOWED_DELAY.call
                 group.update_attribute(:last_photo_change, message.date)
               end
 
@@ -201,7 +201,7 @@ class TululStatsBot
               end
             end
           else
-            send(chat_id: message.chat.id, text: "You're not allowed to use this bot in your group yet, please message @araishikeiwai to ask for permission. For now, please remove the bot from the group")
+            send(chat_id: message.chat.id, text: "You're not allowed to use this bot in your group yet, please message @araishikeiwai to ask for permission. For now, please remove the bot from the group") if Time.now.to_i - message.date < ALLOWED_DELAY.call
           end
         end
       end
