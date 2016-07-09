@@ -45,14 +45,14 @@ class TululStatsBot
             if /^\/last_tulul([@].+)?/.match(message.text && message.text.strip)
               res = group.top('last_tulul')
               res = 'Belum cukup data' if res.gsub("\n", '').strip.empty?
-              send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id) if tulul?(message) && Time.now.to_i - message.date < ALLOWED_DELAY.call
+              send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id) if tulul?(message) && allowed_time?(message.date)
             elsif valid_query(query)
               options = queries.split(' ')[1..-1]
               options = Hash[*options.map{ |opt| [opt.to_sym, true] }.flatten]
               options.merge!({ from_id: user.user_id })
               res = group.top(query, options)
               res = 'Belum cukup data' if res.gsub("\n", '').empty?
-              send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id) if Time.now.to_i - message.date < ALLOWED_DELAY.call
+              send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id) if allowed_time?(message.date)
             else
               user.inc_message
 
@@ -129,7 +129,7 @@ class TululStatsBot
                   time = "%dd %dh %dm %ds" % [dd, hh, mm, ss]
                   res += "\nPrevious title lifetime: #{time}"
                 end
-                send(chat_id: message.chat.id, text: res) if tulul?(message) && Time.now.to_i - message.date < ALLOWED_DELAY.call
+                send(chat_id: message.chat.id, text: res) if tulul?(message) && allowed_time?(message.date)
                 group.update_attribute(:last_title_change, message.date) if title_changed || group.last_title_change == -1
               end
 
@@ -144,7 +144,7 @@ class TululStatsBot
                   time = "%dd %dh %dm %ds" % [dd, hh, mm, ss]
                   res += "\nPrevious photo lifetime: #{time}"
                 end
-                send(chat_id: message.chat.id, text: res) if tulul?(message) && Time.now.to_i - message.date < ALLOWED_DELAY.call
+                send(chat_id: message.chat.id, text: res) if tulul?(message) && allowed_time?(message.date)
                 group.update_attribute(:last_photo_change, message.date)
               end
 
@@ -159,7 +159,7 @@ class TululStatsBot
                   time = "%dd %dh %dm %ds" % [dd, hh, mm, ss]
                   res += "\nPrevious photo lifetime: #{time}"
                 end
-                send(chat_id: message.chat.id, text: res) if tulul?(message) && Time.now.to_i - message.date < ALLOWED_DELAY.call
+                send(chat_id: message.chat.id, text: res) if tulul?(message) && allowed_time?(message.date)
                 group.update_attribute(:last_photo_change, message.date)
               end
 
@@ -190,18 +190,18 @@ class TululStatsBot
               user.add_hour(time.hour)
               user.add_day(time.wday)
 
-              if tulul?(message) && message.text =~ /mau nge-?blog/i && Time.now.to_i - message.date < ALLOWED_DELAY.call
+              if tulul?(message) && message.text =~ /mau nge-?blog/i && allowed_time?(message.date)
                 send(chat_id: message.chat.id, text: 'どうぞ')
               end
 
-              if tulul?(message) && message.text&.gsub(/[^A-Za-z]/, '') =~ /^h+a+h+$/i && Time.now.to_i - message.date < ALLOWED_DELAY.call
+              if tulul?(message) && message.text&.gsub(/[^A-Za-z]/, '') =~ /^h+a+h+$/i && allowed_time?(message.date)
                 user.inc_keong_caller
                 group.users.find_by(user_id: 88878925).inc_forwarded
                 @@bot.api.forward_message(chat_id: message.chat.id, from_chat_id: -12126542, message_id: 102972)
               end
             end
           else
-            send(chat_id: message.chat.id, text: "You're not allowed to use this bot in your group yet, please message @araishikeiwai to ask for permission. For now, please remove the bot from the group") if Time.now.to_i - message.date < ALLOWED_DELAY.call
+            send(chat_id: message.chat.id, text: "You're not allowed to use this bot in your group yet, please message @araishikeiwai to ask for permission. For now, please remove the bot from the group") if allowed_time?(message.date)
           end
         end
       end
@@ -262,6 +262,10 @@ class TululStatsBot
 
   def self.allowed_group?(group_id)
     $redis.get("tulul_stats::allowed_groups::#{group_id}")
+  end
+
+  def self.allowed_time?(date)
+    Time.now.to_i - date < ALLOWED_DELAY.call
   end
 
   def self.tulul?(message)
