@@ -129,7 +129,7 @@ class TululStatsBot
                   time = "%dd %dh %dm %ds" % [dd, hh, mm, ss]
                   res += "\nPrevious title lifetime: #{time}"
                 end
-                send(chat_id: message.chat.id, text: res) if tulul?(message) && allowed_time?(message.date)
+                send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id) if tulul?(message)
                 group.update_attribute(:last_title_change, message.date) if title_changed || group.last_title_change == -1
               end
 
@@ -144,7 +144,7 @@ class TululStatsBot
                   time = "%dd %dh %dm %ds" % [dd, hh, mm, ss]
                   res += "\nPrevious photo lifetime: #{time}"
                 end
-                send(chat_id: message.chat.id, text: res) if tulul?(message) && allowed_time?(message.date)
+                send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id) if tulul?(message)
                 group.update_attribute(:last_photo_change, message.date)
               end
 
@@ -159,7 +159,7 @@ class TululStatsBot
                   time = "%dd %dh %dm %ds" % [dd, hh, mm, ss]
                   res += "\nPrevious photo lifetime: #{time}"
                 end
-                send(chat_id: message.chat.id, text: res) if tulul?(message) && allowed_time?(message.date)
+                send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id) if tulul?(message)
                 group.update_attribute(:last_photo_change, message.date)
               end
 
