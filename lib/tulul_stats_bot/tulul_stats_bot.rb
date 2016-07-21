@@ -96,6 +96,14 @@ class TululStatsBot
                 end
               end
 
+              if message.text =~ /#?anriya/i
+                if message.reply_to_message
+                  group.get_user(message.reply_to_message.from).inc_riya
+                else
+                  user.inc_riya
+                end
+              end
+
               if message.text =~ / lu[^A-Za-z]*$/i
                 user.inc_luing
               end

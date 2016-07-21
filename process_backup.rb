@@ -24,6 +24,7 @@ group.users.each do |user|
     slanging: 0,
     getting: 0,
     blogging: 0,
+    riya: 0,
     luing: 0,
     latecomer: 0,
     honest_asker: 0,
@@ -87,6 +88,14 @@ hash.keys.reverse.each do |id|
       group.get_user(OpenStruct.new(hash[message.reply_id]['from'])).inc_blogging
     else
       user.inc_blogging
+    end
+  end
+
+  if message.text =~ /#?anriya/i
+    if message.reply_id && hash[message.reply_id]
+      group.get_user(OpenStruct.new(hash[message.reply_id]['from'])).inc_riya
+    else
+      user.inc_riya
     end
   end
 

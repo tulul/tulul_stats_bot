@@ -16,6 +16,7 @@ module TululStats
     field :kbbiing,           type: Integer, default: 0
     field :getting,           type: Integer, default: 0
     field :blogging,          type: Integer, default: 0
+    field :riya,              type: Integer, default: 0
     field :luing,             type: Integer, default: 0
     field :latecomer,         type: Integer, default: 0
     field :honest_asker,      type: Integer, default: 0

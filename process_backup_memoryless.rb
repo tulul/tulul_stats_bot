@@ -11,6 +11,8 @@ group.users.each do |user|
     kbbiing: 0,
     slanging: 0,
     getting: 0,
+    blogging: 0,
+    riya: 0,
     luing: 0,
     latecomer: 0,
     ch_title: 0,
@@ -54,6 +56,18 @@ File.foreach('/home/araishikeiwai/Google Drive/Others/Telegram Backups/json/Lyca
 
   if message.text =~ /^\/get/
     user.inc_getting
+  end
+
+  if message.text =~ /<.*blog.*>/i || message.text =~ /%blog/i
+    unless message.reply_id
+      user.inc_blogging
+    end
+  end
+
+  if message.text =~ /#?anriya/i
+    unless message.reply_id
+      user.inc_riya
+    end
   end
 
   if message.text =~ / lu[^A-Za-z]*$/i
