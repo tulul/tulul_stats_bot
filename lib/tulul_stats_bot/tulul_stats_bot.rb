@@ -224,12 +224,10 @@ class TululStatsBot
     puts e.message
     puts e.backtrace.select{ |err| err =~ /tulul/ }.join(', ')
 
-    if e.message =~ /429/
-      sleep(3)
-    elsif e.message =~ /502/
+    if e.message =~ /error_code: .(429|502)./
       sleep(10)
     end
-    retry unless e.message =~ /error_code: .[400|403|409]./
+    retry unless e.message =~ /error_code: .(400|403|409)./
   rescue StandardError => e
     err = e.message + "\n"
     err += e.backtrace.select{ |err| err =~ /tulul/ }.join(', ') + "\n"
@@ -260,7 +258,7 @@ class TululStatsBot
       if e.message =~ /429/
         sleep(3)
       end
-      retry if e.message !~ /error_code: .[400|403|409]./ && (retry_count += 1) < 20
+      retry if e.message !~ /error_code: .(400|403|409)./ && (retry_count += 1) < 20
     end
   end
 
