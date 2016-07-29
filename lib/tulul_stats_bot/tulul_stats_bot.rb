@@ -199,6 +199,7 @@ class TululStatsBot
               user.add_day(time.wday)
 
               if tulul?(message) && message.text =~ /mau nge-?blog/i && allowed_time?(message.date)
+                user.inc_blogging
                 send(chat_id: message.chat.id, text: 'どうぞ')
               end
 
