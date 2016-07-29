@@ -3,8 +3,8 @@ module TululStats
     extend ActiveSupport::Concern
 
     included do
-      has_many :hours, class_name: 'TululStats::Hour'
-      has_many :days, class_name: 'TululStats::Day'
+      has_many :hours, class_name: 'TululStats::Hour', dependent: :destroy
+      has_many :days, class_name: 'TululStats::Day', dependent: :destroy
     end
 
     def add_hour(hour)

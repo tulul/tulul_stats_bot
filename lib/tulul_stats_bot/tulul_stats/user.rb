@@ -52,9 +52,9 @@ module TululStats
 
     EXCEPTION = ['_id', 'user_id', 'group_id', 'first_name', 'last_name', 'username', 'last_tulul_at']
 
-    self.fields.keys.reject{ |field| EXCEPTION.include?(field) }.each do |field|
+    (self.fields.keys - EXCEPTION).each do |field|
       define_method("inc_#{field}") do
-        self.inc("#{field}" => 1)
+        self.inc(field => 1)
       end
     end
 
@@ -78,6 +78,20 @@ module TululStats
 
     def username_or_full_name
       self.username && "@#{self.username}" || self.full_name
+    end
+
+    def merge_from_and_delete!(other_user)
+      (self.class.fields.keys - EXCEPTION).each do |field|
+        self.inc(field => other_user.send(field))
+      end
+
+      ['hour', 'day'].each do |time|
+        other_user.send(time.pluralize).each do |t|
+          self.send(time.pluralize).find_or_create_by(time => t.send(time)).inc(count: t.count)
+        end
+      end
+
+      other_user.destroy
     end
   end
 end
