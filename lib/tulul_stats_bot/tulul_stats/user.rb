@@ -48,6 +48,7 @@ module TululStats
 
     index({ user_id: 1, group_id: 1 }, { unique: true })
     index({ username: 1, group_id: 1 })
+    searchkick
 
     belongs_to :group, class_name: 'TululStats::Group', index: true
 
