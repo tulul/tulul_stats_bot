@@ -7,6 +7,7 @@ module TululStats
     field :first_name,        type: String
     field :last_name,         type: String
     field :username,          type: String
+    field :call_name,         type: String
 
     field :message,           type: Integer, default: 0
     field :qting,             type: Integer, default: 0

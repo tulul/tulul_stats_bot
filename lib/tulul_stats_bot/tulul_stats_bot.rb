@@ -200,7 +200,7 @@ class TululStatsBot
 
               if tulul?(message) && message.text =~ /mau nge-?blog/i && allowed_time?(message.date)
                 user.inc_blogging
-                send(chat_id: message.chat.id, text: 'どうぞ')
+                send(chat_id: message.chat.id, text: "どうぞ #{user.call_name.presence}".strip)
               end
 
               if tulul?(message) && message.text&.gsub(/[^A-Za-z]/, '') =~ /^h+a+h+$/i && allowed_time?(message.date)
