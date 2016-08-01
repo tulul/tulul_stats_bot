@@ -212,7 +212,10 @@ class TululStatsBot
               if tulul?(message) && message.text&.split&.count == 1 && allowed_time?(message.date)
                 possible_call_name = message.text.downcase.gsub(/[^a-z]/, '')
                 possible_user = TululStats::User.search(possible_call_name, fields: [:call_name], misspellings: false).results.first
-                possible_user && send(chat_id: message.chat.id, text: "#{possible_user.call_name} lu")
+                if possible_user
+                  user.inc_luing
+                  send(chat_id: message.chat.id, text: "#{possible_user.call_name} lu")
+                end
               end
             end
           else
