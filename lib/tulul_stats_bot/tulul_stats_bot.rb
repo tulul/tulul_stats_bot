@@ -15,6 +15,11 @@ class TululStatsBot
       @@bot = bot
       bot.listen do |message|
         begin
+          if message&.from&.username == 'araishikeiwai' && message&.text =~ /\/allow/
+            group_id = message&.chat&.id
+            group_id && $redis.set("tulul_stats::allowed_groups::#{group_id}", 1)
+          end
+
           if !message
           elsif message.text =~ /\/chat_id/
             send(chat_id: message.chat.id, text: message.chat.id)
@@ -24,11 +29,9 @@ class TululStatsBot
             elsif message.text =~ /\/set_allow/
               group_id = message.text.split(' ')[1]
               group_id && $redis.set("tulul_stats::allowed_groups::#{group_id}", 1)
-              list_groups(message.chat.id)
             elsif message.text =~ /\/set_disallow/
               group_id = message.text.split(' ')[1]
               group_id && $redis.del("tulul_stats::allowed_groups::#{group_id}")
-              list_groups(message.chat.id)
             else
               query, group_id, *options = message.text.gsub('/', '').split(' ')
               options = Hash[*options.map{ |opt| [opt.to_sym, true] }.flatten]
