@@ -33,13 +33,13 @@ class TululStatsBot
               group_id = message.text.split(' ')[1]
               group_id && $redis.del("tulul_stats::allowed_groups::#{group_id}")
             else
-              query, group_id, *options = message.text.gsub('/', '').split(' ')
+              query, group_id, *options = message.text&.gsub('/', '').split(' ')
               options = Hash[*options.map{ |opt| [opt.to_sym, true] }.flatten]
               options.merge!({ from_id: RICK_ID })
               if valid_query(query) && allowed_group?(group_id)
                 group = TululStats::Group.find_by(group_id: group_id.to_i)
                 res = group.top(query, options)
-                res = 'Belum cukup data' if res.gsub("\n", '').empty?
+                res = 'Belum cukup data' if res&.gsub("\n", '').empty?
                 res = "Stats #{query} for #{group.title}:\n" + res
                 send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id)
                 sleep(0.2)
@@ -53,14 +53,14 @@ class TululStatsBot
             query = queries.split(' ')[0].split('@')[0] rescue nil
             if /^\/last_tulul([@].+)?/.match(message.text && message.text.strip)
               res = group.top('last_tulul')
-              res = 'Belum cukup data' if res.gsub("\n", '').strip.empty?
+              res = 'Belum cukup data' if res&.gsub("\n", '').strip.empty?
               send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id) if tulul?(message) && allowed_time?(message.date)
             elsif valid_query(query)
               options = queries.split(' ')[1..-1]
               options = Hash[*options.map{ |opt| [opt.to_sym, true] }.flatten]
               options.merge!({ from_id: user.user_id })
               res = group.top(query, options)
-              res = 'Belum cukup data' if res.gsub("\n", '').empty?
+              res = 'Belum cukup data' if res&.gsub("\n", '').empty?
               send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id) if allowed_time?(message.date)
             else
               user_update = []
@@ -135,8 +135,8 @@ class TululStatsBot
               if message.new_chat_title
                 old_title, new_title = group.update_title!(message.chat.title)
 
-                old_title.gsub!(/H-\d+/, '')
-                new_title.gsub!(/H-\d+/, '')
+                old_title&.gsub!(/H-\d+/, '')
+                new_title&.gsub!(/H-\d+/, '')
                 title_changed = old_title != new_title
 
                 user_update << [user, :ch_title]
