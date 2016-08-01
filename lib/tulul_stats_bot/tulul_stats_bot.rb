@@ -54,69 +54,70 @@ class TululStatsBot
               res = 'Belum cukup data' if res.gsub("\n", '').empty?
               send(chat_id: message.chat.id, text: res, reply_to_message_id: message.message_id) if allowed_time?(message.date)
             else
-              user.inc_message
+              user_update = []
+              user_update << [user, :message]
 
               if message.reply_to_message
-                user.inc_replying
-                group.get_user(message.reply_to_message.from).inc_replied
+                user_update << [user, :replying]
+                user_update << [group.get_user(message.reply_to_message.from), :replied]
 
                 if message.text =~ /#qt/i
-                  user.inc_qting
+                  user_update << [user, :qting]
                   qted = message.reply_to_message.forward_from || message.reply_to_message.from
-                  group.get_user(qted).inc_qted
+                  user_update << [group.get_user(qted), :qted]
                 end
               end
 
               if message.forward_from
-                user.inc_forwarding
-                group.get_user(message.forward_from).inc_forwarded
+                user_update << [user, :forwarding]
+                user_update << [group.get_user(message.forward_from), :forwarded]
               end
 
               if message.text =~ /^\/leli/
-                user.inc_leliing
+                user_update << [user, :leliing]
               end
 
               if message.text =~ /^\/kbbi/
-                user.inc_kbbiing
+                user_update << [user, :kbbiing]
               end
 
               if message.text =~ /^\/slang/
-                user.inc_slanging
+                user_update << [user, :slanging]
               end
 
               if message.text =~ /^\/get/
-                user.inc_getting
+                user_update << [user, :getting]
               end
 
               if message.text =~ /<.*blog.*>/i || message.text =~ /%blog/i
                 if message.reply_to_message
-                  group.get_user(message.reply_to_message.from).inc_blogging
+                  user_update << [group.get_user(message.reply_to_message.from), :blogging]
                 else
-                  user.inc_blogging
+                  user_update << [user, :blogging]
                 end
               end
 
               if message.text =~ /#?anriya/i
                 if message.reply_to_message
-                  group.get_user(message.reply_to_message.from).inc_riya
+                  user_update << [group.get_user(message.reply_to_message.from), :riya]
                 else
-                  user.inc_riya
+                  user_update << [user, :riya]
                 end
               end
 
               if message.text =~ / lu[^A-Za-z]*$/i
-                user.inc_luing
+                user_update << [user, :luing]
               end
 
               if message.text =~ /\d+k?\+* shitty messages?/i
-                user.inc_latecomer
+                user_update << [user, :latecomer]
               end
 
               if message.text =~ /#honestquestion/i
                 if message.reply_to_message
-                  group.get_user(message.reply_to_message.from).inc_honest_asker
+                  user_update << [group.get_user(message.reply_to_message.from), :honest_asker]
                 else
-                  user.inc_honest_asker
+                  user_update << [user, :honest_asker]
                 end
               end
 
@@ -127,7 +128,7 @@ class TululStatsBot
                 new_title.gsub!(/H-\d+/, '')
                 title_changed = old_title != new_title
 
-                user.inc_ch_title
+                user_update << [user, :ch_title]
                 res = '#TululTitle'
                 unless group.last_title_change == -1 || !title_changed
                   t = message.date - group.last_title_change
@@ -142,7 +143,7 @@ class TululStatsBot
               end
 
               unless message.new_chat_photo.empty?
-                user.inc_ch_photo
+                user_update << [user, :ch_photo]
                 res = "Hey guys, #{user.username_or_full_name} just fixed the aikon! #TululPhoto"
                 unless group.last_photo_change == -1
                   t = message.date - group.last_photo_change
@@ -157,7 +158,7 @@ class TululStatsBot
               end
 
               if message.delete_chat_photo
-                user.inc_del_photo
+                user_update << [user, :del_photo]
                 res = "Hey guys, #{user.username_or_full_name} just abolished the aikon! #TululPhoto"
                 unless group.last_photo_change == -1
                   t = message.date - group.last_photo_change
@@ -171,24 +172,23 @@ class TululStatsBot
                 group.update_attribute(:last_photo_change, message.date)
               end
 
-              group.get_user(message.left_chat_member).inc_left_group if message.left_chat_member
-              group.get_user(message.new_chat_member).inc_join_group if message.new_chat_member
+              user_update << [group.get_user(message.left_chat_member), :left_group] if message.left_chat_member
+              user_update << [group.get_user(message.new_chat_member), :join_group] if message.new_chat_member
 
-              user.inc_text if message.text
-              user.inc_audio if message.audio
-              user.inc_document if message.document
-              user.inc_photo unless message.photo.empty?
-              user.inc_sticker if message.sticker
-              user.inc_video if message.video
-              user.inc_voice if message.voice
-              user.inc_contact if message.contact
-              user.inc_location if message.location
-              user.update_attribute(:last_tulul_at, DateTime.strptime(message.date.to_s, "%s"))
+              user_update << [user, :text] if message.text
+              user_update << [user, :audio] if message.audio
+              user_update << [user, :document] if message.document
+              user_update << [user, :photo] unless message.photo.empty?
+              user_update << [user, :sticker] if message.sticker
+              user_update << [user, :video] if message.video
+              user_update << [user, :voice] if message.voice
+              user_update << [user, :contact] if message.contact
+              user_update << [user, :location] if message.location
 
               message.entities.each do |entity|
-                user.inc_mentioning if entity.type == 'mention'
-                user.inc_hashtagging if entity.type == 'hashtag'
-                user.inc_linking if entity.type == 'url'
+                user_update << [user, :mentioning] if entity.type == 'mention'
+                user_update << [user, :hashtagging] if entity.type == 'hashtag'
+                user_update << [user, :linking] if entity.type == 'url'
                 group.add_entity(message.text, entity) if TululStats::Entity::ENTITY_QUERY.include?(entity.type)
               end
 
@@ -199,13 +199,13 @@ class TululStatsBot
               user.add_day(time.wday)
 
               if tulul?(message) && message.text =~ /mau nge-?blog/i && allowed_time?(message.date)
-                user.inc_blogging
+                user_update << [user, :blogging]
                 send(chat_id: message.chat.id, text: "どうぞ #{user.call_name.presence}".strip)
               end
 
               if tulul?(message) && message.text&.gsub(/[^A-Za-z]/, '') =~ /^h+a+h+$/i && allowed_time?(message.date)
-                user.inc_keong_caller
-                group.users.find_by(user_id: 88878925).inc_forwarded
+                user_update << [user, :keong_caller]
+                user_update << [group.users.find_by(user_id: 88878925), :forwarded]
                 @@bot.api.forward_message(chat_id: message.chat.id, from_chat_id: -12126542, message_id: 102972)
               end
 
@@ -213,9 +213,17 @@ class TululStatsBot
                 possible_call_name = message.text.downcase.gsub(/[^a-z]/, '')
                 possible_user = TululStats::User.search(possible_call_name, fields: [:call_name], misspellings: false).results.first
                 if possible_user
-                  user.inc_luing
+                  user_update << [user, :luing]
                   send(chat_id: message.chat.id, text: "#{possible_user.call_name} lu")
                 end
+              end
+
+              user_update.group_by{ |u| u[0] }.map{ |k, v| [k, v.map{ |vv| vv[1] }]}.each do |uu, attrs|
+                attrs.each do |att|
+                  uu.send("#{att}=", uu.send(att) + 1)
+                end
+                uu.last_tulul_at = DateTime.strptime(message.date.to_s, "%s") if uu.user_id == user.user_id
+                uu.save
               end
             end
           else
