@@ -4,6 +4,12 @@ class TululStatsBot
   ALLOWED_GROUPS = -> { $redis.lrange('tulul_stats::allowed_groups', 0, -1) }
   ALLOWED_DELAY = -> { (res = $redis.get('tulul_stats::allowed_delay')) ? res.to_i : 20 }
 
+  ATENG_HAH = 102972
+  ATENG_ID = 88878925
+  QT_DUMP_CHAT = -138536027
+  RICK_ID = 78028868
+  TULUL_CHAT = -12126542
+
   def self.start
     Telegram::Bot::Client.run($token) do |bot|
       @@bot = bot
@@ -26,7 +32,7 @@ class TululStatsBot
             else
               query, group_id, *options = message.text.gsub('/', '').split(' ')
               options = Hash[*options.map{ |opt| [opt.to_sym, true] }.flatten]
-              options.merge!({ from_id: 78028868 })
+              options.merge!({ from_id: RICK_ID })
               if valid_query(query) && allowed_group?(group_id)
                 group = TululStats::Group.find_by(group_id: group_id.to_i)
                 res = group.top(query, options)
@@ -65,6 +71,8 @@ class TululStatsBot
                   user_update << [user, :qting]
                   qted = message.reply_to_message.forward_from || message.reply_to_message.from
                   user_update << [group.get_user(qted), :qted]
+                  # dump qt
+                  @@bot.api.forward_message(chat_id: QT_DUMP_CHAT, from_chat_id: message.chat.id, message_id: message.reply_to_message.message_id) if tulul?(message)
                 end
               end
 
@@ -198,15 +206,15 @@ class TululStatsBot
               user.add_hour(time.hour)
               user.add_day(time.wday)
 
-              if tulul?(message) && message.text =~ /mau nge-?blog/i && allowed_time?(message.date)
+              if tulul?(message) && message.text =~ /mau nge-?blog/i
                 user_update << [user, :blogging]
-                send(chat_id: message.chat.id, text: "どうぞ #{user.call_name.presence}".strip)
+                send(chat_id: message.chat.id, text: "どうぞ #{user.call_name.presence}".strip) if allowed_time?(message.date)
               end
 
               if tulul?(message) && message.text&.gsub(/[^A-Za-z]/, '') =~ /^h+a+h+$/i && allowed_time?(message.date)
                 user_update << [user, :keong_caller]
-                user_update << [group.users.find_by(user_id: 88878925), :forwarded]
-                @@bot.api.forward_message(chat_id: message.chat.id, from_chat_id: -12126542, message_id: 102972)
+                user_update << [group.users.find_by(user_id: ATENG_ID), :forwarded]
+                @@bot.api.forward_message(chat_id: message.chat.id, from_chat_id: TULUL_CHAT, message_id: ATENG_HAH)
               end
 
               if tulul?(message) && message.text&.split&.count == 1 && allowed_time?(message.date)
@@ -218,7 +226,7 @@ class TululStatsBot
                 end
               end
 
-              user_update.group_by{ |u| u[0] }.map{ |k, v| [k, v.map{ |vv| vv[1] }]}.each do |uu, attrs|
+              user_update.uniq.group_by{ |u| u[0] }.map{ |k, v| [k, v.map{ |vv| vv[1] }]}.each do |uu, attrs|
                 attrs.each do |att|
                   uu.send("#{att}=", uu.send(att) + 1)
                 end
@@ -293,7 +301,7 @@ class TululStatsBot
   end
 
   def self.tulul?(message)
-    [-12126542, -136614216].include?(message.chat.id)
+    [TULUL_CHAT, -136614216].include?(message.chat.id)
   end
 
   def self.list_groups(chat_id)
