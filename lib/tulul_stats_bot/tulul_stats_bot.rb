@@ -209,7 +209,7 @@ class TululStatsBot
                 @@bot.api.forward_message(chat_id: message.chat.id, from_chat_id: -12126542, message_id: 102972)
               end
 
-              if tulul?(message) && message.text&.split&.count == 1
+              if tulul?(message) && message.text&.split&.count == 1 && allowed_time?(message.date)
                 possible_call_name = message.text.downcase.gsub(/[^a-z]/, '')
                 possible_user = TululStats::User.search(possible_call_name, fields: [:call_name], misspellings: false).results.first
                 possible_user && send(chat_id: message.chat.id, text: "#{possible_user.call_name} lu")
