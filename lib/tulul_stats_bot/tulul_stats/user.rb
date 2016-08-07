@@ -52,7 +52,7 @@ module TululStats
 
     belongs_to :group, class_name: 'TululStats::Group', index: true
 
-    EXCEPTION = ['_id', 'user_id', 'group_id', 'first_name', 'last_name', 'username', 'last_tulul_at']
+    EXCEPTION = ['_id', 'user_id', 'group_id', 'first_name', 'last_name', 'username', 'call_name', 'last_tulul_at']
 
     (self.fields.keys - EXCEPTION).each do |field|
       define_method("inc_#{field}") do
