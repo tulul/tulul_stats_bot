@@ -120,10 +120,6 @@ class TululStatsBot
                 user_update << [user, :luing]
               end
 
-              if message.text =~ /\d+k?\+* shitty messages?/i
-                user_update << [user, :latecomer]
-              end
-
               if message.text =~ /#honestquestion/i
                 if message.reply_to_message
                   user_update << [group.get_user(message.reply_to_message.from), :honest_asker]
