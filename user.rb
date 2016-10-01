@@ -1,61 +1,32 @@
 module TululStats
-  class User
-    include Mongoid::Document
+  class User < ActiveRecord::Base
+    before_save :sanitize_names
     include HasTime
 
-    field :user_id,           type: Integer
-    field :first_name,        type: String
-    field :last_name,         type: String
-    field :username,          type: String
-    field :call_name,         type: String
-
-    field :message,           type: Integer, default: 0
-    field :qting,             type: Integer, default: 0
-    field :qted,              type: Integer, default: 0
-    field :leliing,           type: Integer, default: 0
-    field :slanging,          type: Integer, default: 0
-    field :kbbiing,           type: Integer, default: 0
-    field :getting,           type: Integer, default: 0
-    field :blogging,          type: Integer, default: 0
-    field :riya,              type: Integer, default: 0
-    field :luing,             type: Integer, default: 0
-    field :honest_asker,      type: Integer, default: 0
-    field :keong_caller,      type: Integer, default: 0
-    field :mentioning,        type: Integer, default: 0
-    field :hashtagging,       type: Integer, default: 0
-    field :linking,           type: Integer, default: 0
-    field :replying,          type: Integer, default: 0
-    field :replied,           type: Integer, default: 0
-    field :forwarding,        type: Integer, default: 0
-    field :forwarded,         type: Integer, default: 0
-    field :ch_title,          type: Integer, default: 0
-    field :ch_photo,          type: Integer, default: 0
-    field :del_photo,         type: Integer, default: 0
-    field :left_group,        type: Integer, default: 0
-    field :join_group,        type: Integer, default: 0
-    field :last_tulul_at,     type: DateTime
-
-    field :text,              type: Integer, default: 0
-    field :audio,             type: Integer, default: 0
-    field :document,          type: Integer, default: 0
-    field :photo,             type: Integer, default: 0
-    field :sticker,           type: Integer, default: 0
-    field :video,             type: Integer, default: 0
-    field :voice,             type: Integer, default: 0
-    field :contact,           type: Integer, default: 0
-    field :location,          type: Integer, default: 0
-
-    index({ user_id: 1, group_id: 1 }, { unique: true })
-    index({ username: 1, group_id: 1 })
     searchkick
 
-    belongs_to :group, class_name: 'TululStats::Group', index: true
+    ACCESSORS = [:message, :qting, :qted, :leliing, :slanging, :kbbiing, :getting, :blogging, :riya, :luing, :honest_asker, :keong_caller, :mentioning, :hashtagging, :linking, :replying, :replied, :forwarding, :forwarded, :ch_title, :ch_photo, :del_photo, :left_group, :join_group, :text, :audio, :document, :photo, :sticker, :video, :voice, :contact, :location].map(&:to_s)
 
-    EXCEPTION = ['_id', 'user_id', 'group_id', 'first_name', 'last_name', 'username', 'call_name', 'last_tulul_at']
+    belongs_to :group, class_name: 'TululStats::Group', foreign_key: 'group_id'
+    store :data, accessors: ACCESSORS, coder: JSON
 
-    (self.fields.keys - EXCEPTION).each do |field|
+    EXCEPTION = ['id', 'user_id', 'group_id', 'first_name', 'last_name', 'username', 'call_name', 'last_tulul_at', 'created_at', 'updated_at']
+
+    ACCESSORS.each do |field|
+      define_method(field) do
+        super().to_i
+      end
+
+      define_method("#{field}=") do |par|
+        super(par.to_i)
+      end
+
       define_method("inc_#{field}") do
-        self.inc(field => 1)
+        TululStats::User.transaction(requires_new: true) do
+          self.lock!
+          self.send("#{field}=", self.send(field) + 1)
+          self.save!
+        end
       end
     end
 
@@ -82,17 +53,34 @@ module TululStats
     end
 
     def merge_from_and_delete!(other_user)
-      (self.class.fields.keys - EXCEPTION).each do |field|
+      (self.class.column_names - EXCEPTION).each do |field|
         self.inc(field => other_user.send(field))
+        TululStats::User.transaction(requires_new: true) do
+          self.lock!
+          self.send("#{field}=", self.send(field) + other_user.send(field)) if self.respond_to?("#{field}=")
+          self.save!
+        end
       end
 
       ['hour', 'day'].each do |time|
         other_user.send(time.pluralize).each do |t|
-          self.send(time.pluralize).find_or_create_by(time => t.send(time)).inc(count: t.count)
+          "TululStats::#{time.titleize}".constantize.transaction(requires_new: true) do
+            time = self.send(time.pluralize).find_or_create_by(time => t.send(time))
+            time.count += t.count
+            time.save!
+          end
         end
       end
 
       other_user.destroy
+    end
+
+    private
+
+    def sanitize_names
+      self.first_name = self.first_name&.gsub(/\P{ASCII}/, '')
+      self.last_name = self.last_name&.gsub(/\P{ASCII}/, '')
+      self.username = self.username&.gsub(/\P{ASCII}/, '')
     end
   end
 end

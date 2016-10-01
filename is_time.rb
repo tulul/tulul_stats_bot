@@ -5,12 +5,8 @@ module TululStats
     TIME_QUERY = ['hour', 'day']
 
     included do
-      include Mongoid::Document
-
-      field :count, type: Integer, default: 0
-
-      belongs_to :group, class_name: 'TululStats::Group', index: true
-      belongs_to :user, class_name: 'TululStats::User', index: true
+      belongs_to :group, class_name: 'TululStats::Group', foreign_key: 'group_id'
+      belongs_to :user, class_name: 'TululStats::User', foreign_key: 'user_id'
     end
   end
 end

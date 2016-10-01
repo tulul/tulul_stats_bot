@@ -1,17 +1,9 @@
 module TululStats
-  class Group
-    include Mongoid::Document
+  class Group < ActiveRecord::Base
+    before_save :sanitize_title
     include HasTime
 
-    field :group_id, type: Integer
-    field :title, type: String
-    field :last_title_change, type: Integer, default: -1
-    field :last_photo_change, type: Integer, default: -1
-
-    index({ group_id: 1 }, { unique: true })
-
     has_many :users, class_name: 'TululStats::User'
-    has_many :entities, class_name: 'TululStats::Entity'
 
     def self.get_group(message)
       group = self.find_or_create_by(group_id: message.chat.id)
@@ -21,10 +13,6 @@ module TululStats
 
     def get_user(user)
       self.users.get(user, self.id)
-    end
-
-    def add_entity(message, entity)
-      self.entities.add_new(message[entity.offset...entity.offset + entity.length], entity.type, self.id)
     end
 
     def update_title!(new_title)
@@ -93,15 +81,11 @@ module TululStats
         end.join("\n")[0...4000]
       else
         res =
-          if TululStats::Entity::ENTITY_QUERY.include?(field)
-            self.entities.where(type: field).map(&:content).group_by{ |content| content.downcase rescue '' }.map{ |k, v| [k, v.count, nil] }.sort_by{ |k| k[1] }.reverse
-          else
-            self.users.sort_by{ |b| b.send("#{field}") }.reverse.map do |user|
-              sum = user.send("#{field}")
-              ratio_lo = field != 'message' && get_ratio(sum, user.message)
-              [user.full_name, sum, ratio_lo] if sum > 0
-            end.compact
-          end
+          self.users.sort_by{ |b| b.send("#{field}") }.reverse.map do |user|
+            sum = user.send("#{field}")
+            ratio_lo = field != 'message' && get_ratio(sum, user.message)
+            [user.full_name, sum, ratio_lo] if sum > 0
+          end.compact
 
         total = res.inject(0){ |b, c| b + c[1] }.to_f
 
@@ -184,6 +168,12 @@ module TululStats
       phat = [1.0 * sum / total, 1.0].min
 
       (phat + z * z / (2 * total) - z * Math.sqrt((phat * (1 - phat) + z * z / (4 * total)) / total)) / (1 + z * z / total)
+    end
+
+    private
+
+    def sanitize_title
+      self.title = self.title&.gsub(/\P{ASCII}/, '')
     end
   end
 end

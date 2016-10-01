@@ -1,11 +1,7 @@
 module TululStats
-  class Hour
+  class Hour < ActiveRecord::Base
     include IsTime
 
-    field :hour, type: Integer
-
-    index({ hour: 1 })
-
-    default_scope -> { order_by(hour: :asc) }
+    default_scope -> { order(hour: :asc) }
   end
 end

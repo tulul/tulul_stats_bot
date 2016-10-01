@@ -1,4 +1,4 @@
-class TululStatsBot
+class TululStats::TululStatsBot
   @@bot = nil
 
   ALLOWED_GROUPS = -> { $redis.lrange('tulul_stats::allowed_groups', 0, -1) }
@@ -192,13 +192,6 @@ class TululStatsBot
               user_update << [user, :contact] if message.contact
               user_update << [user, :location] if message.location
 
-              message.entities.each do |entity|
-                user_update << [user, :mentioning] if entity.type == 'mention'
-                user_update << [user, :hashtagging] if entity.type == 'hashtag'
-                user_update << [user, :linking] if entity.type == 'url'
-                group.add_entity(message.text, entity) if TululStats::Entity::ENTITY_QUERY.include?(entity.type)
-              end
-
               time = Time.at(message.date).utc
               group.add_hour(time.hour)
               group.add_day(time.wday)
@@ -288,7 +281,7 @@ class TululStatsBot
   end
 
   def self.valid_query(query)
-    query && (TululStats::User.fields.keys.reject{ |field| TululStats::User::EXCEPTION.include?(field) } + TululStats::Entity::ENTITY_QUERY + TululStats::IsTime::TIME_QUERY).include?(query)
+    query && (TululStats::User::ACCESSORS + TululStats::IsTime::TIME_QUERY).include?(query)
   end
 
   def self.allowed_group?(group_id)

@@ -8,11 +8,19 @@ module TululStats
     end
 
     def add_hour(hour)
-      self.hours.find_or_create_by(hour: hour).inc(count: 1)
+      TululStats::Hour.transaction(requires_new: true) do
+        hour = self.hours.find_or_create_by(hour: hour)
+        hour.count += 1
+        hour.save!
+      end
     end
 
     def add_day(day)
-      self.days.find_or_create_by(day: day).inc(count: 1)
+      TululStats::Day.transaction(requires_new: true) do
+        day = self.days.find_or_create_by(day: day)
+        day.count += 1
+        day.save!
+      end
     end
   end
 end
