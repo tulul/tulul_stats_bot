@@ -1,6 +1,5 @@
 module TululStats
   class User < ActiveRecord::Base
-    before_save :sanitize_names
     include HasTime
 
     searchkick
@@ -73,14 +72,6 @@ module TululStats
       end
 
       other_user.destroy
-    end
-
-    private
-
-    def sanitize_names
-      self.first_name = self.first_name&.gsub(/\P{ASCII}/, '')
-      self.last_name = self.last_name&.gsub(/\P{ASCII}/, '')
-      self.username = self.username&.gsub(/\P{ASCII}/, '')
     end
   end
 end

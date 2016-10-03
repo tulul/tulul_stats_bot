@@ -1,6 +1,5 @@
 module TululStats
   class Group < ActiveRecord::Base
-    before_save :sanitize_title
     include HasTime
 
     has_many :users, class_name: 'TululStats::User'
@@ -168,12 +167,6 @@ module TululStats
       phat = [1.0 * sum / total, 1.0].min
 
       (phat + z * z / (2 * total) - z * Math.sqrt((phat * (1 - phat) + z * z / (4 * total)) / total)) / (1 + z * z / total)
-    end
-
-    private
-
-    def sanitize_title
-      self.title = self.title&.gsub(/\P{ASCII}/, '')
     end
   end
 end
