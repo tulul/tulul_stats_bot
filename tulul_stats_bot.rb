@@ -303,7 +303,7 @@ class TululStats::TululStatsBot
   def self.list_groups(chat_id)
     check = "\xE2\x9C\x94"
     cross = "\xE2\x9C\x96"
-    list = TululStats::Group.all.map{ |gr| "#{allowed_group?(gr.group_id) ? check : cross} #{gr.group_id}: #{gr.title}"}.join("\n")
+    list = TululStats::Group.all.sort_by{ |gr| allowed_group?(gr.group_id) ? 0 : 1 }.map{ |gr| "#{allowed_group?(gr.group_id) ? check : cross} #{gr.group_id}: #{gr.title}"}.join("\n")
     send(chat_id: chat_id, text: list)
   end
 end
