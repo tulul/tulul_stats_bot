@@ -1,4 +1,8 @@
 class TululStats::TululStatsBot
+  include Backburner::Queue
+  queue 'tulul-stats-bot'
+  queue_priority 5
+
   @@bot = nil
 
   ALLOWED_GROUPS = -> { $redis.lrange('tulul_stats::allowed_groups', 0, -1) }
@@ -10,7 +14,7 @@ class TululStats::TululStatsBot
   RICK_ID = 78028868
   TULUL_CHAT = -12126542
 
-  def self.start
+  def self.perform
     Telegram::Bot::Client.run($token) do |bot|
       @@bot = bot
       bot.listen do |message|
