@@ -2,6 +2,7 @@ class TululStats::TululStatsBot
   include Backburner::Queue
   queue 'tulul-stats-bot'
   queue_priority 5
+  queue_respond_timeout 0
 
   @@bot = nil
 
