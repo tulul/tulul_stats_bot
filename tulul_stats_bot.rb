@@ -216,7 +216,7 @@ class TululStats::TululStatsBot
 
               if (tulul?(message) || teltub?(message)) && message.text&.gsub(/[^A-Za-z ]/, '')&.split&.count == 1 && allowed_time?(message.date)
                 possible_call_name = message.text.downcase.gsub(/[^a-z]/, '')
-                possible_user = TululStats::User.search(possible_call_name, fields: [:call_name], misspellings: false).results.first
+                possible_user = TululStats::User.search(possible_call_name, fields: [:call_name], misspellings: false, where: { group_id: group.id }).results.first
                 if possible_user
                   user_update << [user, :luing]
                   send(chat_id: message.chat.id, text: "#{possible_user.call_name} lu")
