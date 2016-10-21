@@ -214,7 +214,7 @@ class TululStats::TululStatsBot
                 @@bot.api.forward_message(chat_id: message.chat.id, from_chat_id: TULUL_CHAT, message_id: ATENG_HAH)
               end
 
-              if tulul?(message) && message.text&.gsub(/[^A-Za-z ]/, '')&.split&.count == 1 && allowed_time?(message.date)
+              if (tulul?(message) || teltub?(message)) && message.text&.gsub(/[^A-Za-z ]/, '')&.split&.count == 1 && allowed_time?(message.date)
                 possible_call_name = message.text.downcase.gsub(/[^a-z]/, '')
                 possible_user = TululStats::User.search(possible_call_name, fields: [:call_name], misspellings: false).results.first
                 if possible_user
@@ -299,6 +299,10 @@ class TululStats::TululStatsBot
 
   def self.tulul?(message)
     [TULUL_CHAT, -136614216].include?(message.chat.id)
+  end
+
+  def self.teltub?(message)
+    message.chat.id == -24142665
   end
 
   def self.list_groups(chat_id)
