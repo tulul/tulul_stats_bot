@@ -80,7 +80,7 @@ class TululStats::TululStatsBot
                   qted = message.reply_to_message.forward_from || message.reply_to_message.from
                   user_update << [group.get_user(qted), :qted]
                   # dump qt
-                  @@bot.api.forward_message(chat_id: QT_DUMP_CHAT, from_chat_id: message.chat.id, message_id: message.reply_to_message.message_id) if tulul?(message)
+                  @@bot.api.forward_message(chat_id: QT_DUMP_CHAT, from_chat_id: message.chat.id, message_id: message.reply_to_message.message_id) rescue nil if tulul?(message)
                 end
               end
 
