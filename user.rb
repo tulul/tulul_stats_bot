@@ -52,13 +52,12 @@ module TululStats
     end
 
     def merge_from_and_delete!(other_user)
-      (self.class.column_names - EXCEPTION).each do |field|
-        self.inc(field => other_user.send(field))
-        TululStats::User.transaction(requires_new: true) do
-          self.lock!
+      TululStats::User.transaction(requires_new: true) do
+        self.lock!
+        ACCESSORS.each do |field|
           self.send("#{field}=", self.send(field) + other_user.send(field)) if self.respond_to?("#{field}=")
-          self.save!
         end
+        self.save!
       end
 
       ['hour', 'day'].each do |time|
