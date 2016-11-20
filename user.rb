@@ -63,9 +63,9 @@ module TululStats
       ['hour', 'day'].each do |time|
         other_user.send(time.pluralize).each do |t|
           "TululStats::#{time.titleize}".constantize.transaction(requires_new: true) do
-            time = self.send(time.pluralize).find_or_create_by(time => t.send(time))
-            time.count += t.count
-            time.save!
+            tt = self.send(time.pluralize).find_or_create_by(time => t.send(time))
+            tt.count += t.count
+            tt.save!
           end
         end
       end
