@@ -208,18 +208,18 @@ class TululStats::TululStatsBot
                 send(chat_id: message.chat.id, text: "どうぞ #{user.call_name.presence}".strip) if allowed_time?(message.date)
               end
 
-              if tulul?(message) && message.text&.gsub(/[^A-Za-z]/, '') =~ /^h+a+h+$/i && allowed_time?(message.date)
+              if tulul?(message) && message.text&.gsub(/[^A-Za-z]/, '') =~ /^h+a+h+$/i
                 user_update << [user, :keong_caller]
                 user_update << [group.users.find_by(user_id: ATENG_ID), :forwarded]
-                @@bot.api.forward_message(chat_id: message.chat.id, from_chat_id: TULUL_CHAT, message_id: ATENG_HAH)
+                @@bot.api.forward_message(chat_id: message.chat.id, from_chat_id: TULUL_CHAT, message_id: ATENG_HAH) if allowed_time?(message.date)
               end
 
-              if (tulul?(message) || teltub?(message)) && message.text&.gsub(/[^A-Za-z ]/, '')&.split&.count == 1 && allowed_time?(message.date)
+              if (tulul?(message) || teltub?(message)) && message.text&.gsub(/[^A-Za-z ]/, '')&.split&.count == 1
                 possible_call_name = message.text.downcase.gsub(/[^a-z]/, '')
                 possible_user = TululStats::User.search(possible_call_name, fields: [:call_name], misspellings: false, where: { group_id: group.id }).results.first
                 if possible_user
                   user_update << [user, :luing]
-                  send(chat_id: message.chat.id, text: "#{possible_user.call_name} lu")
+                  send(chat_id: message.chat.id, text: "#{possible_user.call_name} lu") if allowed_time?(message.date)
                 end
               end
 
