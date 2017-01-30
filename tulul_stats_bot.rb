@@ -302,7 +302,7 @@ class TululStats::TululStatsBot
   end
 
   def self.teltub?(message)
-    message.chat.id == -24142665
+    message.chat.id == -1001115513910
   end
 
   def self.list_groups(chat_id)
