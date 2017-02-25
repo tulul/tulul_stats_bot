@@ -256,7 +256,11 @@ class TululStats::TululStatsBot
     err += e.backtrace.select{ |err| err =~ /tulul/ }.join(', ') + "\n"
     err += Time.now.utc.to_s
     @@bot.api.send_message(chat_id: TululStats::User.find_by(username: 'araishikeiwai').user_id, text: "EXCEPTION! CHECK SERVER! \n\n#{err}")
-    retry unless err =~ /execution expired/
+    if err =~ /execution expired/
+      Bacburner.enqueue(::TululStats::TululStatsBot)
+    else
+      retry
+    end
   end
 
   def self.send(options)
