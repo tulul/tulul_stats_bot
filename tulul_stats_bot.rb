@@ -257,7 +257,7 @@ class TululStats::TululStatsBot
     err += Time.now.utc.to_s
     @@bot.api.send_message(chat_id: TululStats::User.find_by(username: 'araishikeiwai').user_id, text: "EXCEPTION! CHECK SERVER! \n\n#{err}")
     if err =~ /execution expired/
-      Bacburner.enqueue(::TululStats::TululStatsBot)
+      ::Backburner.enqueue(::TululStats::TululStatsBot)
     else
       retry
     end
