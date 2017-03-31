@@ -32,6 +32,9 @@ class TululStats::InputProcessor
       elsif message.text =~ /\/set_disallow/
         group_id = message.text.split(' ')[1]
         group_id && $redis.del("tulul_stats::allowed_groups::#{group_id}")
+      elsif message.text =~ /^tulsend/i
+        t = message.text.gsub(/^tulsend */i, '')
+        send(chat_id: TULUL_CHAT, text: t)
       else
         return unless message.text
         query, group_id, *options = message.text.downcase.gsub('/', '').split(' ')
