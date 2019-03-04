@@ -2,7 +2,7 @@ module TululStats
   class User < ActiveRecord::Base
     include HasTime
 
-    searchkick
+    searchkick settings: { number_of_shards: 1, number_of_replicas: 0 }
 
     ACCESSORS = [:message, :qting, :qted, :leliing, :slanging, :kbbiing, :getting, :blogging, :riya, :luing, :honest_asker, :keong_caller, :mentioning, :hashtagging, :linking, :replying, :replied, :forwarding, :forwarded, :ch_title, :ch_photo, :del_photo, :left_group, :join_group, :text, :audio, :document, :photo, :sticker, :video, :voice, :contact, :location].map(&:to_s)
 
