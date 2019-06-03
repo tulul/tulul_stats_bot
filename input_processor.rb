@@ -21,7 +21,7 @@ class TululStats::InputProcessor
       group_id && $redis.set("tulul_stats::allowed_groups::#{group_id}", 1)
     end
 
-    if message&.text =~ /^\/ikea (\d+)$/
+    if message&.text =~ /^\/ikea (.+)$/
       prcode = $1
       prices = {}
       regex = /(\d+,?)+(\.\d+)?/
