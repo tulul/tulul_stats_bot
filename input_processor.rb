@@ -24,14 +24,15 @@ class TululStats::InputProcessor
     if message&.text =~ /^\/ikea (\d+)$/
       prcode = $1
       prices = {}
+      regex = /(\d+,?)+(\.\d+)?/
       [:jp, :my, :sg].each do |country|
         doc = Nokogiri::HTML(open("https://www.ikea.com/#{country}/en/catalog/products/#{prcode}/"))
         prices[country] =
           case country
           when :my, :sg
-            doc.css('span.product-pip__price__value').first.text.match(/\d+(\.\d+)?/)[0].to_f rescue nil
+            doc.css('span.product-pip__price__value').first.text.match(regex)[0].gsub(',', '').to_f rescue nil
           when :jp
-            doc.css('div#prodPrice span').first.text.strip.match(/\d+(\.\d+)?/)[0].to_f rescue nil
+            doc.css('div#prodPrice span').first.text.strip.match(regex)[0].gsub(',', '').to_f rescue nil
           end
       end
 
