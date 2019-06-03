@@ -29,9 +29,9 @@ class TululStats::InputProcessor
         prices[country] =
           case country
           when :my, :sg
-            doc.css('span.product-pip__price__value').first.text rescue nil
+            doc.css('span.product-pip__price__value').first.text.match(/\d+(\.\d+)?/)[0].to_f rescue nil
           when :jp
-            doc.css('div#prodPrice span').first.text.strip rescue nil
+            doc.css('div#prodPrice span').first.text.strip.match(/\d+(\.\d+)?/)[0].to_f rescue nil
           end
       end
 
@@ -43,12 +43,12 @@ class TululStats::InputProcessor
       }
       prices.each do |k, v|
         next unless v
-        converted_prices[k] = ExpenseManager::Converter.convert(v.scan(/\d+(\.\d+)?/), currency[k])
+        converted_prices[k] = ExpenseManager::Converter.convert(v, currency[k])
       end
 
       text = ["Prices for #{prcode}:"]
       converted_prices.sort_by { |_, v| v }.each do |k, v|
-        text << "#{k.to_s.upcase}: #{prices[k]} (Rp#{v})"
+        text << "#{k.to_s.upcase}: #{ExpenseManager.currency_format(prices[k], unit: currency[k])} (#{ExpenseManager.currency_format(v, unit: 'IDR')})"
       end
 
       send(chat_id: message.chat.id, text: text.join("\n"))
