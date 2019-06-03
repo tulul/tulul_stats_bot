@@ -21,6 +21,39 @@ class TululStats::InputProcessor
       group_id && $redis.set("tulul_stats::allowed_groups::#{group_id}", 1)
     end
 
+    if message&.text =~ /^\/ikea (\d+)$/
+      prcode = $1
+      prices = {}
+      [:jp, :my, :sg].each do |country|
+        doc = Nokogiri::HTML(open("https://www.ikea.com/#{country}/en/catalog/products/#{prcode}/"))
+        prices[country] =
+          case country
+          when :my, :sg
+            doc.css('span.product-pip__price__value').first.text rescue nil
+          when :jp
+            doc.css('div#prodPrice span').first.text.strip rescue nil
+          end
+      end
+
+      converted_prices = {}
+      currency = {
+        jp: 'JPY',
+        sg: 'SGD',
+        my: 'MYR'
+      }
+      prices.each do |k, v|
+        next unless v
+        converted_prices[k] = ExpenseManager::Converter.convert(v.scan(/\d+(\.\d+)?/), currency[k])
+      end
+
+      text = ["Prices for #{prcode}:"]
+      converted_prices.sort_by { |_, v| v }.each do |k, v|
+        text << "#{k.to_s.upcase}: #{prices[k]} (Rp#{v})"
+      end
+
+      send(chat_id: message.chat.id, text: text.join("\n"))
+    end
+
     if message.text =~ /\/chat_id/
       send(chat_id: message.chat.id, text: message.chat.id)
     elsif message.from.username == 'araishikeiwai' && message.chat.type == 'private'
