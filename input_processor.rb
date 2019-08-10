@@ -9,7 +9,7 @@ class TululStats::InputProcessor
   ATENG_ID = 88878925
   QT_DUMP_CHAT = -138536027
   RICK_ID = 78028868
-  TULUL_CHAT = -12126542
+  TULUL_CHAT = -1001366432746
 
   def perform(message, bot)
     @bot = bot
@@ -56,7 +56,7 @@ class TululStats::InputProcessor
     end
 
     if message.text =~ /\/chat_id/
-      send(chat_id: message.chat.id, text: message.chat.id)
+      send(chat_id: message.chat.id, text: message.chat.id.to_s)
     elsif message.from.username == 'araishikeiwai' && message.chat.type == 'private'
       if message.text == '/list'
         list_groups(message.chat.id)
