@@ -5,7 +5,7 @@ class TululStats::InputProcessor
   ALLOWED_GROUPS = -> { $redis.lrange('tulul_stats::allowed_groups', 0, -1) }
   ALLOWED_DELAY = -> { (res = $redis.get('tulul_stats::allowed_delay')) ? res.to_i : 20 }
 
-  ATENG_HAH = 102972
+  ATENG_HAH = 1036
   ATENG_ID = 88878925
   QT_DUMP_CHAT = -138536027
   RICK_ID = 78028868
