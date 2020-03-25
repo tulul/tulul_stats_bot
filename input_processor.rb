@@ -1,4 +1,5 @@
 class TululStats::InputProcessor
+  
   include SuckerPunch::Job
   workers 5
 
@@ -7,7 +8,8 @@ class TululStats::InputProcessor
 
   ATENG_HAH = 1036
   ATENG_ID = 88878925
-  QT_DUMP_CHAT = -138536027
+  # QT_DUMP_CHAT = -138536027
+  QT_DUMP_CHAT = -1001444860254
   RICK_ID = 78028868
   TULUL_CHAT = -1001366432746
 
