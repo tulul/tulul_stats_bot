@@ -1,5 +1,5 @@
 module TululStats
-  class User < ActiveRecord::Base
+  class User < ApplicationRecord
     include HasTime
 
     searchkick settings: { number_of_shards: 1, number_of_replicas: 0 }

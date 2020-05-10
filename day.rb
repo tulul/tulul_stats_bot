@@ -1,5 +1,5 @@
 module TululStats
-  class Day < ActiveRecord::Base
+  class Day < ApplicationRecord
     include IsTime
 
     default_scope -> { order(day: :asc) }

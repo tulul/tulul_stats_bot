@@ -1,5 +1,5 @@
 module TululStats
-  class Group < ActiveRecord::Base
+  class Group < ApplicationRecord
     include HasTime
 
     has_many :users, class_name: 'TululStats::User'
